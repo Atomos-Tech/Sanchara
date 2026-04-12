@@ -1,0 +1,153 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 224 71% 11%;
+    --foreground: 210 40% 92%;
+
+    --card: 222 47% 14%;
+    --card-foreground: 210 40% 92%;
+
+    --popover: 222 47% 14%;
+    --popover-foreground: 210 40% 92%;
+
+    --primary: 187 80% 55%;
+    --primary-foreground: 224 71% 7%;
+
+    --secondary: 222 30% 22%;
+    --secondary-foreground: 210 40% 88%;
+
+    --muted: 222 30% 18%;
+    --muted-foreground: 215 20% 55%;
+
+    --accent: 37 90% 60%;
+    --accent-foreground: 224 71% 7%;
+
+    --destructive: 0 72% 55%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 222 30% 22%;
+    --input: 222 30% 22%;
+    --ring: 187 80% 55%;
+
+    --radius: 0.75rem;
+
+    --sidebar-background: 224 71% 9%;
+    --sidebar-foreground: 210 40% 92%;
+    --sidebar-primary: 187 80% 55%;
+    --sidebar-primary-foreground: 224 71% 7%;
+    --sidebar-accent: 222 30% 18%;
+    --sidebar-accent-foreground: 210 40% 92%;
+    --sidebar-border: 222 30% 22%;
+    --sidebar-ring: 187 80% 55%;
+
+    /* Custom Sanchara tokens */
+    --glass-bg: 222 47% 14% / 0.6;
+    --glass-border: 222 30% 30% / 0.3;
+    --glow-cyan: 187 80% 55%;
+    --glow-amber: 37 90% 60%;
+    --status-green: 142 70% 49%;
+    --status-yellow: 45 93% 58%;
+    --status-red: 0 72% 55%;
+    --surface-elevated: 222 40% 16%;
+  }
+
+  .dark {
+    --background: 224 71% 11%;
+    --foreground: 210 40% 92%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    -webkit-tap-highlight-color: transparent;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+    font-family: 'Inter', sans-serif;
+    overscroll-behavior-y: none;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Space Grotesk', sans-serif;
+  }
+
+  /* Production input styling */
+  input, textarea, select {
+    font-size: 16px; /* Prevent iOS zoom on focus */
+  }
+}
+
+@layer components {
+  .glass-card {
+    @apply rounded-xl border backdrop-blur-xl;
+    background: hsl(var(--glass-bg));
+    border-color: hsl(var(--glass-border));
+  }
+
+  .glass-card-elevated {
+    @apply glass-card shadow-lg;
+    box-shadow: 0 8px 32px hsl(224 71% 5% / 0.4);
+  }
+
+  .glow-cyan {
+    box-shadow: 0 0 20px hsl(var(--glow-cyan) / 0.15),
+                0 0 60px hsl(var(--glow-cyan) / 0.05);
+  }
+
+  .glow-amber {
+    box-shadow: 0 0 20px hsl(var(--glow-amber) / 0.15),
+                0 0 60px hsl(var(--glow-amber) / 0.05);
+  }
+
+  .status-green { color: hsl(var(--status-green)); }
+  .status-yellow { color: hsl(var(--status-yellow)); }
+  .status-red { color: hsl(var(--status-red)); }
+
+  .bg-status-green { background-color: hsl(var(--status-green)); }
+  .bg-status-yellow { background-color: hsl(var(--status-yellow)); }
+  .bg-status-red { background-color: hsl(var(--status-red)); }
+
+  .text-gradient-cyan {
+    @apply bg-clip-text text-transparent;
+    background-image: linear-gradient(135deg, hsl(var(--glow-cyan)), hsl(187 60% 70%));
+  }
+
+  .text-gradient-amber {
+    @apply bg-clip-text text-transparent;
+    background-image: linear-gradient(135deg, hsl(var(--glow-amber)), hsl(37 80% 75%));
+  }
+
+  /* Safe area for bottom navigation */
+  .safe-area-bottom {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+}
+
+@layer utilities {
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Smooth native-like touch feedback */
+  .touch-feedback {
+    @apply active:scale-[0.97] transition-transform duration-100;
+  }
+}
