@@ -8,8 +8,9 @@ import { useToast } from '@/hooks/use-toast';
 const catFilters = ['all', 'food', 'upgrade', 'merch', 'experience'] as const;
 
 export default function WalletPage() {
-  const { user, spendPoints } = useArenaStore();
+  const { user, spendPoints, claimReward, userRewards, activeTab, setActiveTab } = useArenaStore();
   const [activeFilter, setActiveFilter] = useState<typeof catFilters[number]>('all');
+  const [view, setView] = useState<'store' | 'my-rewards'>('store');
   const { toast } = useToast();
 
   const rewards = activeFilter === 'all' ? mockRewards : mockRewards.filter((r) => r.category === activeFilter);
@@ -17,6 +18,7 @@ export default function WalletPage() {
 
   const handleRedeem = (reward: typeof mockRewards[0]) => {
     if (spendPoints(reward.pointsCost)) {
+      claimReward(reward);
       toast({
         title: '🎉 Reward Redeemed!',
         description: `${reward.name} has been added to your wallet.`,
@@ -79,59 +81,120 @@ export default function WalletPage() {
         ))}
       </div>
 
-      {/* Rewards Store */}
-      <div>
-        <h2 className="text-lg font-display font-bold text-foreground mb-3">Rewards Store</h2>
-
-        <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-2">
-          {catFilters.map((f) => (
-            <button
-              key={f}
-              onClick={() => setActiveFilter(f)}
-              className={`px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-all ${
-                activeFilter === f ? 'bg-accent text-accent-foreground' : 'glass-card text-muted-foreground'
-              }`}
-            >
-              {f.charAt(0).toUpperCase() + f.slice(1)}
-            </button>
-          ))}
-        </div>
+      {/* View Switcher */}
+      <div className="flex gap-2 p-1 glass-card rounded-xl">
+        <button
+          onClick={() => setView('store')}
+          className={`flex-1 py-2 rounded-lg text-xs font-semibold transition-all ${
+            view === 'store' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground'
+          }`}
+        >
+          Rewards Store
+        </button>
+        <button
+          onClick={() => setView('my-rewards')}
+          className={`flex-1 py-2 rounded-lg text-xs font-semibold transition-all ${
+            view === 'my-rewards' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground'
+          }`}
+        >
+          My Rewards ({userRewards.length})
+        </button>
       </div>
 
-      <div className="space-y-2">
-        {rewards.map((reward, i) => {
-          const canAfford = user.arenaPoints >= reward.pointsCost;
-          return (
-            <motion.div
-              key={reward.id}
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.05 }}
-              className="glass-card p-4"
-            >
-              <div className="flex items-center gap-3">
-                <span className="text-2xl">{reward.icon}</span>
-                <div className="flex-1">
-                  <h3 className="text-sm font-semibold text-foreground">{reward.name}</h3>
-                  <p className="text-xs text-muted-foreground">{reward.description}</p>
-                </div>
+      {view === 'store' ? (
+        <>
+          <div>
+            <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-2">
+              {catFilters.map((f) => (
                 <button
-                  onClick={() => handleRedeem(reward)}
-                  disabled={!canAfford}
-                  className={`flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-semibold transition-all ${
-                    canAfford
-                      ? 'bg-accent text-accent-foreground hover:bg-accent/80 active:scale-95'
-                      : 'bg-muted text-muted-foreground'
+                  key={f}
+                  onClick={() => setActiveFilter(f)}
+                  className={`px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-all ${
+                    activeFilter === f ? 'bg-accent text-accent-foreground' : 'glass-card text-muted-foreground'
                   }`}
                 >
-                  {!canAfford && <Lock size={10} />}
-                  {reward.pointsCost.toLocaleString()} pts
+                  {f.charAt(0).toUpperCase() + f.slice(1)}
                 </button>
-              </div>
-            </motion.div>
-          );
-        })}
-      </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            {rewards.map((reward, i) => {
+              const canAfford = user.arenaPoints >= reward.pointsCost;
+              return (
+                <motion.div
+                  key={reward.id}
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: i * 0.05 }}
+                  className="glass-card p-4"
+                >
+                  <div className="flex items-center gap-3">
+                    <span className="text-2xl">{reward.icon}</span>
+                    <div className="flex-1">
+                      <h3 className="text-sm font-semibold text-foreground">{reward.name}</h3>
+                      <p className="text-xs text-muted-foreground">{reward.description}</p>
+                    </div>
+                    <button
+                      onClick={() => handleRedeem(reward)}
+                      disabled={!canAfford}
+                      className={`flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-semibold transition-all ${
+                        canAfford
+                          ? 'bg-accent text-accent-foreground hover:bg-accent/80 active:scale-95'
+                          : 'bg-muted text-muted-foreground'
+                      }`}
+                    >
+                      {!canAfford && <Lock size={10} />}
+                      {reward.pointsCost.toLocaleString()} pts
+                    </button>
+                  </div>
+                </motion.div>
+              );
+            })}
+          </div>
+        </>
+      ) : (
+        <div className="space-y-2">
+          {userRewards.length === 0 ? (
+            <div className="glass-card p-8 text-center mt-4">
+              <Gift size={32} className="mx-auto text-muted-foreground mb-3" />
+              <p className="text-sm text-muted-foreground">No rewards yet</p>
+              <button onClick={() => setView('store')} className="mt-3 px-4 py-2 rounded-xl bg-primary text-primary-foreground text-xs font-semibold">
+                Browse Store
+              </button>
+            </div>
+          ) : (
+            userRewards.map((reward, i) => (
+              <motion.div
+                key={`${reward.id}-${i}`}
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: i * 0.05 }}
+                className="glass-card-elevated p-4 glow-cyan"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 rounded-xl bg-primary/15 flex items-center justify-center text-2xl">
+                    {reward.icon}
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="text-sm font-display font-semibold text-foreground">{reward.name}</h3>
+                    <p className="text-xs text-muted-foreground">{reward.description}</p>
+                  </div>
+                  <button
+                    onClick={() => {
+                        toast({ title: 'Reward Activated', description: `Show this at the concession stand.` });
+                    }}
+                    className="px-3 py-1.5 rounded-lg bg-primary text-primary-foreground text-xs font-semibold hover:bg-primary/90 active:scale-95"
+                  >
+                    Use Now
+                  </button>
+                </div>
+              </motion.div>
+            ))
+          )}
+        </div>
+      )}
     </motion.div>
   );
 }

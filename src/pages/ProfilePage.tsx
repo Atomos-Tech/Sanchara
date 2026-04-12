@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useArenaStore } from '@/stores/arenaStore';
 import { useBookingStore } from '@/stores/bookingStore';
@@ -23,22 +23,6 @@ const tiers = [
 function getTier(points: number) {
   return [...tiers].reverse().find((t) => points >= t.min) || tiers[0];
 }
-
-const mockAddresses = [
-  { id: 'a1', label: 'Default Seat', section: '108', row: 'D', seat: '12', venue: 'Crypto.com Arena', isDefault: true },
-  { id: 'a2', label: 'VIP Box', section: 'VIP-3', row: 'A', seat: '1-4', venue: 'Crypto.com Arena', isDefault: false },
-  { id: 'a3', label: 'SoFi Stadium', section: '234', row: 'F', seat: '8', venue: 'SoFi Stadium', isDefault: false },
-];
-
-interface PaymentMethod {
-  id: string; type: string; last4?: string; expiry?: string; isDefault: boolean; label?: string; balance?: number;
-}
-
-const mockPayments: PaymentMethod[] = [
-  { id: 'p1', type: 'visa', last4: '4242', expiry: '09/28', isDefault: true },
-  { id: 'p2', type: 'mastercard', last4: '8888', expiry: '03/27', isDefault: false },
-  { id: 'p3', type: 'wallet', label: 'Arena Points Wallet', balance: 0, isDefault: false },
-];
 
 const mockPastOrders: (Order & { date: string })[] = [
   { id: 'past-001', items: [{ id: 'm1', name: 'Stadium Burger', description: '', price: 14.99, category: 'food', image: '🍔', quantity: 2, popular: true }, { id: 'm3', name: 'Craft IPA', description: '', price: 12.99, category: 'drinks', image: '🍺', quantity: 2 }], total: 55.96, status: 'delivered', deliveryType: 'seat', estimatedMinutes: 0, date: '2026-04-05' },
@@ -84,12 +68,9 @@ export default function ProfilePage() {
   const [newCardName, setNewCardName] = useState('');
 
   // Addresses state
-  const [addresses, setAddresses] = useState(mockAddresses);
+  const { savedAddresses: addresses, updateAddresses: setAddresses, savedPayments: payments, updatePayments: setPayments } = useArenaStore();
   const [showAddAddress, setShowAddAddress] = useState(false);
   const [newAddr, setNewAddr] = useState({ label: '', section: '', row: '', seat: '', venue: '' });
-
-  // Payments state
-  const [payments, setPayments] = useState(mockPayments);
 
   // Notifications state
   const [notifSettings, setNotifSettings] = useState({
@@ -107,6 +88,14 @@ export default function ProfilePage() {
   const [autoPlay, setAutoPlay] = useState(false);
   const [showLogout, setShowLogout] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [profilePic, setProfilePic] = useState<string | null>(() => localStorage.getItem('sanchara-profile-pic'));
+
+  useEffect(() => {
+    if (darkMode) document.documentElement.classList.add('dark');
+    else document.documentElement.classList.remove('dark');
+  }, [darkMode]);
 
   const handleSaveProfile = () => {
     updateUserName(editName);
@@ -157,7 +146,21 @@ export default function ProfilePage() {
   };
 
   const handlePhotoChange = () => {
-    toast({ title: '📸 Photo Upload', description: 'Photo upload will be available with cloud storage.' });
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const base64 = reader.result as string;
+        setProfilePic(base64);
+        localStorage.setItem('sanchara-profile-pic', base64);
+        toast({ title: '📸 Photo Uploaded', description: 'Your profile picture has been saved locally.' });
+      };
+      reader.readAsDataURL(file);
+    }
   };
 
   const handleSetDefaultAddress = (id: string) => {
@@ -217,8 +220,13 @@ export default function ProfilePage() {
         return (
           <div className="space-y-4">
             <div className="glass-card p-5 text-center">
-              <div className="w-20 h-20 rounded-full bg-primary/15 mx-auto mb-3 flex items-center justify-center border-2 border-primary/30 relative">
-                <User size={36} className="text-primary" />
+              <input type="file" ref={fileInputRef} onChange={handleFileChange} accept="image/*" className="hidden" />
+              <div className="w-20 h-20 rounded-full bg-primary/15 mx-auto mb-3 flex items-center justify-center border-2 border-primary/30 relative overflow-hidden">
+                {profilePic ? (
+                  <img src={profilePic} alt="Profile" className="w-full h-full object-cover" />
+                ) : (
+                  <User size={36} className="text-primary" />
+                )}
                 <button
                   onClick={handlePhotoChange}
                   className="absolute -bottom-1 -right-1 w-7 h-7 rounded-full bg-primary flex items-center justify-center"
@@ -623,7 +631,7 @@ export default function ProfilePage() {
                   <Moon size={18} className="text-muted-foreground" />
                   <span className="text-sm text-foreground">Dark Mode</span>
                 </div>
-                <button onClick={() => { setDarkMode(!darkMode); toast({ title: darkMode ? '☀️ Light Mode' : '🌙 Dark Mode', description: `${darkMode ? 'Light' : 'Dark'} mode activated.` }); }}>
+                <button onClick={() => { setDarkMode(!darkMode); toast({ title: !darkMode ? '🌙 Dark Mode' : '☀️ Light Mode', description: `${!darkMode ? 'Dark' : 'Light'} mode activated.` }); }}>
                   {darkMode ? <ToggleRight size={28} className="text-primary" /> : <ToggleLeft size={28} className="text-muted-foreground" />}
                 </button>
               </div>
@@ -632,7 +640,12 @@ export default function ProfilePage() {
                   <Smartphone size={18} className="text-muted-foreground" />
                   <span className="text-sm text-foreground">Haptic Feedback</span>
                 </div>
-                <button onClick={() => { setHapticFeedback(!hapticFeedback); toast({ title: 'Haptic Feedback', description: hapticFeedback ? 'Disabled' : 'Enabled' }); }}>
+                <button onClick={() => { 
+                  const next = !hapticFeedback;
+                  setHapticFeedback(next); 
+                  if (next && navigator.vibrate) navigator.vibrate([30]);
+                  toast({ title: 'Haptic Feedback', description: next ? 'Enabled' : 'Disabled' }); 
+                }}>
                   {hapticFeedback ? <ToggleRight size={28} className="text-primary" /> : <ToggleLeft size={28} className="text-muted-foreground" />}
                 </button>
               </div>
@@ -781,8 +794,12 @@ export default function ProfilePage() {
         {/* Profile Header */}
         <div className="glass-card-elevated p-5 text-center glow-cyan">
           <div className="relative inline-block">
-            <div className="w-20 h-20 rounded-full bg-primary/15 mx-auto mb-3 flex items-center justify-center border-2 border-primary/30">
-              <User size={36} className="text-primary" />
+            <div className="w-20 h-20 rounded-full bg-primary/15 mx-auto mb-3 flex items-center justify-center border-2 border-primary/30 overflow-hidden">
+              {profilePic ? (
+                <img src={profilePic} alt="Profile" className="w-full h-full object-cover" />
+              ) : (
+                <User size={36} className="text-primary" />
+              )}
             </div>
             <button
               onClick={() => setSubPage('editProfile')}

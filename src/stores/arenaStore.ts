@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
 import type { CartItem, MenuItem, Order, ArenaAlert, UserProfile } from '@/types/arena';
 import { mockUser, mockOrders, mockAlerts } from '@/data/mockData';
 
@@ -8,6 +9,9 @@ interface ArenaState {
   orders: Order[];
   alerts: ArenaAlert[];
   activeTab: string;
+  userRewards: RewardItem[];
+  savedAddresses: any[];
+  savedPayments: any[];
 
   setActiveTab: (tab: string) => void;
   addToCart: (item: MenuItem) => void;
@@ -19,8 +23,11 @@ interface ArenaState {
   markAllAlertsRead: () => void;
   claimDailyDrop: () => number;
   spendPoints: (amount: number) => boolean;
+  claimReward: (reward: RewardItem) => void;
   updateUserName: (name: string) => void;
   progressOrderStatus: (orderId: string) => void;
+  updateAddresses: (addresses: any[]) => void;
+  updatePayments: (payments: any[]) => void;
 }
 
 const statusFlow: Record<string, Order['status'] | null> = {
@@ -30,14 +37,25 @@ const statusFlow: Record<string, Order['status'] | null> = {
   delivered: null,
 };
 
-export const useArenaStore = create<ArenaState>((set, get) => ({
-  user: mockUser,
-  cart: [],
-  orders: mockOrders,
-  alerts: mockAlerts,
-  activeTab: 'home',
+export const useArenaStore = create<ArenaState>()(
+  persist(
+    (set, get) => ({
+      user: mockUser,
+      cart: [],
+      orders: mockOrders,
+      alerts: mockAlerts,
+      activeTab: 'home',
+      userRewards: [],
+      savedAddresses: [
+        { id: 'a1', label: 'Default Seat', section: '108', row: 'D', seat: '12', venue: 'Crypto.com Arena', isDefault: true },
+        { id: 'a2', label: 'VIP Box', section: 'VIP-3', row: 'A', seat: '1-4', venue: 'Crypto.com Arena', isDefault: false },
+      ],
+      savedPayments: [
+        { id: 'p1', type: 'visa', last4: '4242', expiry: '09/28', isDefault: true },
+        { id: 'p3', type: 'wallet', label: 'Arena Points Wallet', balance: 0, isDefault: false },
+      ],
 
-  setActiveTab: (tab) => set({ activeTab: tab }),
+      setActiveTab: (tab) => set({ activeTab: tab }),
 
   addToCart: (item) => set((state) => {
     const existing = state.cart.find((c) => c.id === item.id);
@@ -127,6 +145,10 @@ export const useArenaStore = create<ArenaState>((set, get) => ({
     user: { ...state.user, name },
   })),
 
+  claimReward: (reward) => set((state) => ({
+    userRewards: [reward, ...state.userRewards]
+  })),
+
   progressOrderStatus: (orderId) => set((state) => {
     const order = state.orders.find((o) => o.id === orderId);
     if (!order) return state;
@@ -134,4 +156,12 @@ export const useArenaStore = create<ArenaState>((set, get) => ({
     if (!next) return state;
     return { orders: state.orders.map((o) => o.id === orderId ? { ...o, status: next } : o) };
   }),
-}));
+
+  updateAddresses: (addresses) => set({ savedAddresses: addresses }),
+  updatePayments: (payments) => set({ savedPayments: payments }),
+    }),
+    {
+      name: 'sanchara-arena-storage',
+    }
+  )
+);

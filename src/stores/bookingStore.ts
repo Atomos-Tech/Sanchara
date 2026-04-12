@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
 import type { CalendarEvent, SeatingTier, PreOrderItem } from '@/types/booking';
 import type { MenuItem } from '@/types/arena';
 import { promoCodes } from '@/data/bookingData';
@@ -37,16 +38,18 @@ interface BookingStore {
   resetBooking: () => void;
 }
 
-export const useBookingStore = create<BookingStore>((set, get) => ({
-  selectedEvent: null,
-  selectedTier: null,
-  ticketQuantity: 1,
-  preOrderItems: [],
-  bookingStep: 0,
-  promoCode: '',
-  promoDiscount: 0,
-  promoLabel: '',
-  bookedEvents: [],
+export const useBookingStore = create<BookingStore>()(
+  persist(
+    (set, get) => ({
+      selectedEvent: null,
+      selectedTier: null,
+      ticketQuantity: 1,
+      preOrderItems: [],
+      bookingStep: 0,
+      promoCode: '',
+      promoDiscount: 0,
+      promoLabel: '',
+      bookedEvents: [],
 
   selectEvent: (event) => set({ selectedEvent: event, bookingStep: 1 }),
   selectTier: (tier) => set({ selectedTier: tier }),
@@ -131,4 +134,9 @@ export const useBookingStore = create<BookingStore>((set, get) => ({
     promoDiscount: 0,
     promoLabel: '',
   }),
-}));
+    }),
+    {
+      name: 'sanchara-booking-storage',
+    }
+  )
+);

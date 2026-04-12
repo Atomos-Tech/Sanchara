@@ -9,7 +9,8 @@ const typeConfig = {
   reward: { icon: Gift, color: 'text-accent', bg: 'bg-accent/15' },
 };
 
-function timeAgo(date: Date) {
+function timeAgo(dateInput: Date | string) {
+  const date = typeof dateInput === 'string' ? new Date(dateInput) : dateInput;
   const mins = Math.floor((Date.now() - date.getTime()) / 60000);
   if (mins < 1) return 'Just now';
   if (mins < 60) return `${mins}m ago`;

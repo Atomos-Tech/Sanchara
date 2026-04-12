@@ -3,8 +3,9 @@ import { mockTicket } from '@/data/mockData';
 import { useArenaStore } from '@/stores/arenaStore';
 import { useBookingStore } from '@/stores/bookingStore';
 import { useSimulationStore } from '@/hooks/useSimulationEngine';
-import { QrCode, Navigation, Clock, Gift, Flame, Trophy, CalendarDays, ChevronRight, Sparkles, ArrowRight } from 'lucide-react';
-import { useState } from 'react';
+import { QrCode, Navigation, Clock, Gift, Flame, Trophy, CalendarDays, ChevronRight, Sparkles, ArrowRight, X, MapPin } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { toast } from 'sonner';
 
 const pageVariants = {
   initial: { opacity: 0, y: 12 },
@@ -20,6 +21,22 @@ export default function DashboardPage() {
   const { bookedEvents } = useBookingStore();
   const [dailyPoints, setDailyPoints] = useState<number | null>(null);
   const [showDrop, setShowDrop] = useState(false);
+  const [showQR, setShowQR] = useState<any>(null);
+  const [geoStatus, setGeoStatus] = useState<'checking' | 'inside' | 'outside' | 'denied' | null>(null);
+
+  useEffect(() => {
+    if ('geolocation' in navigator) {
+      setGeoStatus('checking');
+      navigator.geolocation.getCurrentPosition(
+        () => {
+          // Authentic mock: Assuming if they grant permission, we welcome them.
+          setGeoStatus('inside');
+          toast('📍 Welcome to the Arena!', { description: 'Venue location verified. Interactive features unlocked.' });
+        },
+        () => setGeoStatus('denied')
+      );
+    }
+  }, []);
 
   const gates = useSimulationStore((s) => s.gates);
   const bestGate = [...gates].sort((a, b) => a.waitMinutes - b.waitMinutes)[0];
@@ -60,7 +77,10 @@ export default function DashboardPage() {
               <h2 className="text-lg font-display font-bold text-foreground">{mockTicket.eventName}</h2>
               <p className="text-sm text-muted-foreground">{mockTicket.venue}</p>
             </div>
-            <button className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center hover:bg-primary/20 transition-colors touch-feedback">
+            <button
+              onClick={() => setShowQR(mockTicket)}
+              className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center hover:bg-primary/20 transition-colors touch-feedback"
+            >
               <QrCode size={28} className="text-primary" />
             </button>
           </div>
@@ -79,6 +99,23 @@ export default function DashboardPage() {
           </div>
         </div>
       </motion.div>
+
+      {/* Geofence Status */}
+      <AnimatePresence>
+        {geoStatus === 'inside' && (
+          <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} className="glass-card p-3 flex items-center justify-between glow-cyan border-primary/30">
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center animate-pulse">
+                <MapPin size={14} className="text-primary" />
+              </div>
+              <div>
+                <p className="text-xs font-semibold text-foreground">Verified In-Venue</p>
+                <p className="text-[10px] text-muted-foreground">Location Services Active</p>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Quick Actions Row */}
       <motion.div variants={itemVariants} className="grid grid-cols-4 gap-2">
@@ -215,9 +252,12 @@ export default function DashboardPage() {
                 <h3 className="text-sm font-semibold text-foreground truncate">{event.name}</h3>
                 <p className="text-xs text-muted-foreground">{event.venue} · {event.time}</p>
               </div>
-              <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+              <button
+                onClick={() => setShowQR(event)}
+                className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center hover:bg-primary/20 transition-colors"
+              >
                 <QrCode size={20} className="text-primary" />
-              </div>
+              </button>
             </div>
           ))}
         </motion.div>
@@ -258,6 +298,70 @@ export default function DashboardPage() {
           </div>
         ))}
       </motion.div>
+
+      {/* QR Code Modal */}
+      <AnimatePresence>
+        {showQR && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 bg-background/80 backdrop-blur-md flex items-center justify-center p-6"
+            onClick={() => setShowQR(null)}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.9, opacity: 0, y: 20 }}
+              transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+              onClick={(e) => e.stopPropagation()}
+              className="w-full max-w-sm glass-card-elevated p-6 relative"
+            >
+              <button
+                onClick={() => setShowQR(null)}
+                className="absolute top-4 right-4 w-8 h-8 rounded-full bg-secondary flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-secondary/80 transition-colors"
+              >
+                <X size={16} />
+              </button>
+              
+              <div className="text-center mt-2">
+                <h2 className="text-lg font-display font-bold text-foreground">{showQR.eventName || showQR.name}</h2>
+                <p className="text-sm text-muted-foreground">{showQR.venue}</p>
+              </div>
+
+              <div className="my-8 aspect-square rounded-2xl bg-white p-4 flex items-center justify-center mx-auto w-[240px]">
+                {/* Fallback QR representation since we don't have a real QR library in free tier */}
+                <div className="w-full h-full border-4 border-black border-dashed flex items-center justify-center bg-gray-100/50">
+                  <QrCode size={100} className="text-black/80" />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4 text-center border-t border-border/50 pt-4">
+                <div>
+                  <p className="text-[10px] text-muted-foreground uppercase">Section</p>
+                  <p className="text-base font-bold text-foreground">{showQR.section || '108'}</p>
+                </div>
+                <div>
+                  <p className="text-[10px] text-muted-foreground uppercase">Seat</p>
+                  <p className="text-base font-bold text-foreground">{showQR.seat ? `${showQR.row || ''}${showQR.seat}` : 'General'}</p>
+                </div>
+              </div>
+              
+              <div className="mt-4">
+                <div className="w-full h-1.5 rounded-full bg-secondary overflow-hidden relative">
+                  <motion.div
+                    initial={{ x: '-100%' }}
+                    animate={{ x: '100%' }}
+                    transition={{ repeat: Infinity, duration: 2, ease: 'linear' }}
+                    className="absolute inset-0 w-1/2 bg-primary/50"
+                  />
+                </div>
+                <p className="text-center text-[10px] text-muted-foreground mt-2 uppercase tracking-wide">Ready for Scanner</p>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </motion.div>
   );
 }

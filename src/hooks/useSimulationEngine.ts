@@ -3,6 +3,7 @@ import { create } from 'zustand';
 import { mockFacilities, mockGates } from '@/data/mockData';
 import type { Facility, GateSuggestion } from '@/types/arena';
 import { toast } from 'sonner';
+import { useArenaStore } from '@/stores/arenaStore';
 
 interface SimulationState {
   facilities: Facility[];
@@ -61,6 +62,20 @@ export function useSimulationEngine() {
         toast(`Live Update: Wait time at Gate ${changed.gate} has ${direction} to ${changed.waitMinutes} min`, {
           duration: 3000,
           icon: '📡',
+        });
+      }
+
+      // Progress active orders automatically to prevent them from getting stuck!
+      const { orders, progressOrderStatus } = useArenaStore.getState();
+      const activeOrders = orders.filter(o => o.status !== 'delivered');
+      if (activeOrders.length > 0 && Math.random() < 0.6) {
+        const orderToProgress = activeOrders[Math.floor(Math.random() * activeOrders.length)];
+        progressOrderStatus(orderToProgress.id);
+        const states = { preparing: 'Ready', ready: 'On the way', delivering: 'Delivered' };
+        // We use the OLD status to look up what it *became*
+        toast(`Order #${orderToProgress.id.slice(-6)} update: ${states[orderToProgress.status]}`, {
+          duration: 4000,
+          icon: '📦',
         });
       }
     }, 15000);
