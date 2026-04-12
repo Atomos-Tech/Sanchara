@@ -1,8 +1,9 @@
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, useMotionValue, useTransform } from 'framer-motion';
 import { mockTicket } from '@/data/mockData';
 import { useArenaStore } from '@/stores/arenaStore';
 import { useBookingStore } from '@/stores/bookingStore';
 import { useSimulationStore } from '@/hooks/useSimulationEngine';
+import { useHaptics } from '@/hooks/useHaptics';
 import { QrCode, Navigation, Clock, Gift, Flame, Trophy, CalendarDays, ChevronRight, Sparkles, ArrowRight, X, MapPin } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { toast } from 'sonner';
@@ -23,6 +24,36 @@ export default function DashboardPage() {
   const [showDrop, setShowDrop] = useState(false);
   const [showQR, setShowQR] = useState<any>(null);
   const [geoStatus, setGeoStatus] = useState<'checking' | 'inside' | 'outside' | 'denied' | null>(null);
+  const { playChime, vibrate } = useHaptics();
+
+  const rotateX = useMotionValue(0);
+  const rotateY = useMotionValue(0);
+
+  useEffect(() => {
+    const handleOrientation = (e: DeviceOrientationEvent) => {
+      if (e.beta && e.gamma) {
+        // Clamp bounds for realistic holographic tilt
+        const bx = Math.max(-15, Math.min(15, (e.beta - 45) * 0.5));
+        const gy = Math.max(-15, Math.min(15, e.gamma * 0.5));
+        rotateX.set(-bx);
+        rotateY.set(gy);
+      }
+    };
+
+    // Need permission on iOS 13+
+    const requestAccess = () => {
+      if (typeof (DeviceOrientationEvent as any).requestPermission === 'function') {
+        (DeviceOrientationEvent as any).requestPermission().then((p: string) => {
+          if (p === 'granted') window.addEventListener('deviceorientation', handleOrientation);
+        }).catch(console.error);
+      } else {
+        window.addEventListener('deviceorientation', handleOrientation);
+      }
+    };
+    requestAccess();
+
+    return () => window.removeEventListener('deviceorientation', handleOrientation);
+  }, [rotateX, rotateY]);
 
   useEffect(() => {
     if ('geolocation' in navigator) {
@@ -44,6 +75,7 @@ export default function DashboardPage() {
   const handleDailyDrop = () => {
     if (user.dailyDropClaimed) return;
     setShowDrop(true);
+    playChime('success');
     setTimeout(() => {
       const pts = claimDailyDrop();
       setDailyPoints(pts);
@@ -68,10 +100,22 @@ export default function DashboardPage() {
       </motion.div>
 
       {/* Digital Ticket */}
-      <motion.div variants={itemVariants} className="glass-card-elevated p-4 glow-cyan relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full -mr-12 -mt-12" />
-        <div className="relative">
-          <div className="flex items-start justify-between mb-3">
+      <motion.div variants={itemVariants} className="perspective-[1000px]">
+        <motion.div 
+          className="glass-card-elevated p-4 glow-cyan relative overflow-hidden will-change-transform"
+          style={{ rotateX, rotateY, transformStyle: 'preserve-3d' }}
+        >
+          {/* Shimmer overlay layer moving opposite to device tilt */}
+          <motion.div 
+            className="absolute inset-0 bg-gradient-to-tr from-white/0 via-white/20 to-white/0 mix-blend-overlay pointer-events-none"
+            style={{ 
+              x: useTransform(rotateY, [-15, 15], [100, -100]), 
+              y: useTransform(rotateX, [-15, 15], [50, -50]) 
+            }}
+          />
+          <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full -mr-12 -mt-12" style={{ transform: 'translateZ(10px)' }} />
+          <div className="relative" style={{ transform: 'translateZ(20px)' }}>
+            <div className="flex items-start justify-between mb-3">
             <div>
               <p className="text-xs text-muted-foreground uppercase tracking-wider">Your Ticket</p>
               <h2 className="text-lg font-display font-bold text-foreground">{mockTicket.eventName}</h2>
@@ -98,6 +142,7 @@ export default function DashboardPage() {
             ))}
           </div>
         </div>
+        </motion.div>
       </motion.div>
 
       {/* Geofence Status */}

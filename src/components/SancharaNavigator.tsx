@@ -1,6 +1,7 @@
 import { motion, AnimatePresence, useMotionValue, useTransform, animate } from 'framer-motion';
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { X, Navigation2, MapPin, ChevronDown } from 'lucide-react';
+import { X, Navigation2, MapPin, ChevronDown, Camera } from 'lucide-react';
+import { useHaptics } from '@/hooks/useHaptics';
 
 // Stadium POI coordinates on SVG viewBox (0-400 x 0-300)
 const POIs: Record<string, { x: number; y: number; label: string }> = {
@@ -47,6 +48,40 @@ export default function SancharaNavigator({ open, onClose }: Props) {
   const progress = useMotionValue(0);
   const pathRef = useRef<SVGPathElement>(null);
   const animRef = useRef<ReturnType<typeof animate>>();
+  const { playChime, vibrate } = useHaptics();
+
+  // AR State
+  const [arMode, setArMode] = useState(false);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const streamRef = useRef<MediaStream | null>(null);
+
+  const toggleAR = async () => {
+    if (arMode) {
+      streamRef.current?.getTracks().forEach(t => t.stop());
+      setArMode(false);
+      vibrate(10);
+    } else {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+        streamRef.current = stream;
+        setArMode(true);
+        vibrate([20, 30, 20]);
+        // The ref attachment happens after state update via a small timeout to let react mount it
+        setTimeout(() => {
+          if (videoRef.current) videoRef.current.srcObject = stream;
+        }, 50);
+      } catch (e) {
+        console.error('AR Access Denied or Unavailable');
+      }
+    }
+  };
+
+  useEffect(() => {
+    // Cleanup video stream on dismount
+    return () => {
+      streamRef.current?.getTracks().forEach(t => t.stop());
+    };
+  }, []);
 
   const from = POIs[fromId];
   const to = POIs[toId];
@@ -66,6 +101,7 @@ export default function SancharaNavigator({ open, onClose }: Props) {
   const startRouting = () => {
     if (fromId === toId) return;
     setRouting(true);
+    playChime('success');
     const totalSec = Math.floor(Math.random() * 120) + 60; // 1-3 min mock
     setEta(totalSec);
 
@@ -130,9 +166,14 @@ export default function SancharaNavigator({ open, onClose }: Props) {
                 <Navigation2 size={18} className="text-primary" />
                 Sanchara Navigator
               </h2>
-              <button onClick={() => { stopRouting(); onClose(); }} className="p-2 rounded-lg hover:bg-secondary/30 transition-colors">
-                <X size={20} className="text-muted-foreground" />
-              </button>
+              <div className="flex items-center gap-2">
+                <button onClick={toggleAR} className={`p-2 rounded-lg transition-colors ${arMode ? 'bg-primary text-primary-foreground glow-cyan' : 'bg-secondary/30 text-muted-foreground hover:bg-secondary/50'}`}>
+                  <Camera size={18} />
+                </button>
+                <button onClick={() => { stopRouting(); onClose(); }} className="p-2 rounded-lg hover:bg-secondary/30 transition-colors">
+                  <X size={20} className="text-muted-foreground" />
+                </button>
+              </div>
             </div>
 
             {/* From / To selectors */}
@@ -167,15 +208,24 @@ export default function SancharaNavigator({ open, onClose }: Props) {
           </div>
 
           {/* SVG Stadium Map */}
-          <div className="flex-1 overflow-hidden p-4">
-            <svg viewBox="0 0 400 300" className="w-full h-full" style={{ maxHeight: '55vh' }}>
+          <div className="flex-1 overflow-hidden p-4 relative">
+            {arMode && (
+              <video
+                ref={videoRef}
+                autoPlay
+                playsInline
+                muted
+                className="absolute inset-0 w-full h-full object-cover opacity-50 z-0"
+              />
+            )}
+            <svg viewBox="0 0 400 300" className="w-full h-full relative z-10" style={{ maxHeight: '55vh' }}>
               {/* Stadium outer wall */}
-              <ellipse cx="200" cy="150" rx="190" ry="140" fill="none" stroke="hsl(var(--border))" strokeWidth="2" opacity="0.4" />
+              {!arMode && <ellipse cx="200" cy="150" rx="190" ry="140" fill="none" stroke="hsl(var(--border))" strokeWidth="2" opacity="0.4" />}
               {/* Inner concourse */}
-              <ellipse cx="200" cy="150" rx="150" ry="110" fill="none" stroke="hsl(var(--border))" strokeWidth="1" opacity="0.2" />
+              {!arMode && <ellipse cx="200" cy="150" rx="150" ry="110" fill="none" stroke="hsl(var(--border))" strokeWidth="1" opacity="0.2" />}
               {/* Court/Field */}
-              <rect x="140" y="100" width="120" height="100" rx="8" fill="none" stroke="hsl(var(--border))" strokeWidth="1.5" opacity="0.3" />
-              <text x="200" y="155" textAnchor="middle" fill="hsl(var(--muted-foreground))" opacity="0.3" fontSize="12" fontWeight="bold">COURT</text>
+              {!arMode && <rect x="140" y="100" width="120" height="100" rx="8" fill="none" stroke="hsl(var(--border))" strokeWidth="1.5" opacity="0.3" />}
+              {!arMode && <text x="200" y="155" textAnchor="middle" fill="hsl(var(--muted-foreground))" opacity="0.3" fontSize="12" fontWeight="bold">COURT</text>}
 
               {/* Section labels */}
               {[

@@ -12,6 +12,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { Suspense, lazy, useEffect, useState } from 'react';
 import { DashboardSkeleton, ExploreSkeleton, OrderSkeleton, GenericSkeleton } from '@/components/PageSkeleton';
 import { useSimulationEngine } from '@/hooks/useSimulationEngine';
+import OfflineNotice from '@/components/OfflineNotice';
 
 const pages: Record<string, React.ComponentType> = {
   home: DashboardPage,
@@ -50,6 +51,19 @@ export default function Index() {
     return () => clearTimeout(t);
   }, [activeTab]);
 
+  const [isOnline, setIsOnline] = useState(typeof window !== 'undefined' ? navigator.onLine : true);
+
+  useEffect(() => {
+    const handleOnline = () => setIsOnline(true);
+    const handleOffline = () => setIsOnline(false);
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, []);
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -81,8 +95,9 @@ export default function Index() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <main className="max-w-lg mx-auto px-4 pt-6 pb-24">
+    <div className="min-h-screen bg-background relative" style={{ overflow: 'hidden' }}>
+      {!isOnline && <OfflineNotice />}
+      <main className="max-w-lg mx-auto px-4 pt-6 pb-24 h-[100dvh] overflow-y-auto overflow-x-hidden sanchara-scroll relative">
         <ErrorBoundary>
           <AnimatePresence mode="wait">
             <motion.div
