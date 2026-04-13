@@ -26,9 +26,16 @@ export const MAX_PHOTO_SIZE = 200 * 1024;
 /** Allowed MIME types for profile photos */
 export const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
 
-/** Sanitize user text input — strips HTML tags and trims whitespace */
+/** 
+ * Sanitize user text input — strips HTML tags and trims whitespace.
+ * For security, we also strip script and style tags along with their content.
+ */
 export function sanitize(input: string): string {
-  return input.replace(/<[^>]*>/g, '').trim();
+  return input
+    .replace(/<script\b[^>]*>([\s\S]*?)<\/script>/gim, '')
+    .replace(/<style\b[^>]*>([\s\S]*?)<\/style>/gim, '')
+    .replace(/<[^>]*>/g, '')
+    .trim();
 }
 
 /** Get the tier for a given point count */

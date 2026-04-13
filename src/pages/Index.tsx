@@ -61,8 +61,21 @@ export default function Index() {
 
   // Simulate initial data loading for production feel
   useEffect(() => {
-    const timer = setTimeout(() => setIsLoading(false), 600);
-    return () => clearTimeout(timer);
+    // Primary timer for the "smooth" experience
+    const timer = setTimeout(() => setIsLoading(false), 800);
+    
+    // Safety guard: even if rehydration or other effects take time, force render
+    const safetyTimer = setTimeout(() => {
+      setIsLoading(prev => {
+        if (prev) console.warn('[Index] Loading exceeded 2s limit, forcing render.');
+        return false;
+      });
+    }, 2500);
+
+    return () => {
+      clearTimeout(timer);
+      clearTimeout(safetyTimer);
+    };
   }, []);
 
   const [isOnline, setIsOnline] = useState(typeof window !== 'undefined' ? navigator.onLine : true);
