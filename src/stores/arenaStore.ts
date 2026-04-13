@@ -1,7 +1,30 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import type { CartItem, MenuItem, Order, ArenaAlert, UserProfile } from '@/types/arena';
+import type { CartItem, MenuItem, Order, ArenaAlert, UserProfile, RewardItem } from '@/types/arena';
 import { mockUser, mockOrders, mockAlerts } from '@/data/mockData';
+import { trackEvent } from '@/lib/firebase';
+
+/** Represents a saved seat/address configuration */
+export interface SavedAddress {
+  id: string;
+  label: string;
+  section: string;
+  row: string;
+  seat: string;
+  venue: string;
+  isDefault: boolean;
+}
+
+/** Represents a saved payment method */
+export interface SavedPayment {
+  id: string;
+  type: 'visa' | 'mastercard' | 'wallet';
+  last4?: string;
+  expiry?: string;
+  label?: string;
+  balance?: number;
+  isDefault: boolean;
+}
 
 interface ArenaState {
   user: UserProfile;
@@ -10,8 +33,8 @@ interface ArenaState {
   alerts: ArenaAlert[];
   activeTab: string;
   userRewards: RewardItem[];
-  savedAddresses: any[];
-  savedPayments: any[];
+  savedAddresses: SavedAddress[];
+  savedPayments: SavedPayment[];
 
   setActiveTab: (tab: string) => void;
   addToCart: (item: MenuItem) => void;
@@ -26,8 +49,8 @@ interface ArenaState {
   claimReward: (reward: RewardItem) => void;
   updateUserName: (name: string) => void;
   progressOrderStatus: (orderId: string) => void;
-  updateAddresses: (addresses: any[]) => void;
-  updatePayments: (payments: any[]) => void;
+  updateAddresses: (addressesOrUpdater: SavedAddress[] | ((prev: SavedAddress[]) => SavedAddress[])) => void;
+  updatePayments: (paymentsOrUpdater: SavedPayment[] | ((prev: SavedPayment[]) => SavedPayment[])) => void;
 }
 
 const statusFlow: Record<string, Order['status'] | null> = {
@@ -57,7 +80,9 @@ export const useArenaStore = create<ArenaState>()(
 
       setActiveTab: (tab) => set({ activeTab: tab }),
 
+  /** Add a menu item to the cart, incrementing quantity if already present */
   addToCart: (item) => set((state) => {
+    trackEvent('add_to_cart', { item_id: item.id, item_name: item.name, price: item.price });
     const existing = state.cart.find((c) => c.id === item.id);
     if (existing) {
       return { cart: state.cart.map((c) => c.id === item.id ? { ...c, quantity: c.quantity + 1 } : c) };
@@ -77,10 +102,12 @@ export const useArenaStore = create<ArenaState>()(
 
   clearCart: () => set({ cart: [] }),
 
+  /** Place an order from the current cart, awarding Arena Points and starting status progression */
   placeOrder: (deliveryType) => {
-    const { cart, progressOrderStatus } = get();
+    const { cart } = get();
     if (cart.length === 0) return;
     const total = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+    trackEvent('place_order', { delivery_type: deliveryType, total, item_count: cart.length });
     const orderId = `ord-${Date.now()}`;
     const newOrder: Order = {
       id: orderId,
@@ -124,8 +151,14 @@ export const useArenaStore = create<ArenaState>()(
     alerts: state.alerts.map((a) => ({ ...a, read: true })),
   })),
 
+  /** Claim daily login bonus points. Uses date-based deduplication via localStorage. */
   claimDailyDrop: () => {
+    const today = new Date().toISOString().split('T')[0];
+    const lastClaim = localStorage.getItem('sanchara-daily-drop-date');
+    if (lastClaim === today) return 0;
     const points = Math.floor(Math.random() * 150) + 50;
+    localStorage.setItem('sanchara-daily-drop-date', today);
+    trackEvent('claim_daily_drop', { points });
     set((state) => ({
       user: { ...state.user, arenaPoints: state.user.arenaPoints + points, dailyDropClaimed: true, streak: state.user.streak + 1 },
     }));
@@ -157,11 +190,22 @@ export const useArenaStore = create<ArenaState>()(
     return { orders: state.orders.map((o) => o.id === orderId ? { ...o, status: next } : o) };
   }),
 
-  updateAddresses: (addresses) => set({ savedAddresses: addresses }),
-  updatePayments: (payments) => set({ savedPayments: payments }),
+  updateAddresses: (addressesOrUpdater) => set((state) => ({
+    savedAddresses: typeof addressesOrUpdater === 'function'
+      ? addressesOrUpdater(state.savedAddresses)
+      : addressesOrUpdater,
+  })),
+  updatePayments: (paymentsOrUpdater) => set((state) => ({
+    savedPayments: typeof paymentsOrUpdater === 'function'
+      ? paymentsOrUpdater(state.savedPayments)
+      : paymentsOrUpdater,
+  })),
     }),
     {
       name: 'sanchara-arena-storage',
+      partialize: (state) => Object.fromEntries(
+        Object.entries(state).filter(([key]) => !['savedPayments'].includes(key))
+      ),
     }
   )
 );

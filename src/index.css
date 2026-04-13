@@ -151,3 +151,66 @@
     @apply active:scale-[0.97] transition-transform duration-100;
   }
 }
+
+/* Respect user's preference for reduced motion (WCAG 2.3.3) */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Respect OS color scheme preference */
+@media (prefers-color-scheme: light) {
+  html:not(.dark) {
+    --background: 0 0% 100%;
+    --foreground: 224 71% 11%;
+    --card: 0 0% 98%;
+    --card-foreground: 224 71% 11%;
+    --primary: 187 80% 40%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 220 14% 90%;
+    --secondary-foreground: 224 71% 11%;
+    --muted: 220 14% 96%;
+    --muted-foreground: 220 9% 46%;
+    --accent: 37 90% 50%;
+    --accent-foreground: 0 0% 100%;
+    --border: 220 13% 87%;
+    --input: 220 13% 87%;
+    --glass-bg: 0 0% 100% / 0.8;
+    --glass-border: 220 13% 87% / 0.4;
+  }
+}
+
+/* Keyboard focus outlines for accessibility */
+:focus-visible {
+  outline: 2px solid hsl(var(--ring));
+  outline-offset: 2px;
+  border-radius: var(--radius);
+}
+
+/* Screen reader only utility */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+.sr-only.focus\:not-sr-only:focus {
+  position: static;
+  width: auto;
+  height: auto;
+  padding: 0;
+  margin: 0;
+  overflow: visible;
+  clip: auto;
+  white-space: normal;
+}

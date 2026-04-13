@@ -1,17 +1,25 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useArenaStore } from '@/stores/arenaStore';
 import { useBookingStore } from '@/stores/bookingStore';
 import { useToast } from '@/hooks/use-toast';
 import {
-  User, MapPin, CreditCard, Ticket, HelpCircle, ChevronRight, X, ArrowLeft,
+  User, MapPin, CreditCard, Ticket, HelpCircle, ChevronRight, ArrowLeft,
   Shield, Star, Crown, Settings, LogOut, Bell, Moon, Armchair, Plus, Trash2,
-  Check, Edit3, Package, RotateCcw, Mail, Phone, Globe, Lock, Eye, EyeOff,
-  ChevronDown, ToggleLeft, ToggleRight, Smartphone, Info, MessageCircle, Camera
+  Check, Edit3, Package, RotateCcw, Mail, Phone, Lock, Eye, EyeOff,
+  ToggleLeft, ToggleRight, Info, MessageCircle, Camera
 } from 'lucide-react';
 import type { Order } from '@/types/arena';
-
-type SubPage = null | 'addresses' | 'payments' | 'tickets' | 'help' | 'settings' | 'editProfile' | 'pastOrders' | 'notifications' | 'changePassword' | 'addPayment' | 'privacyPolicy' | 'termsOfService';
+import { mockPastOrders } from '@/data/pastOrders';
+import {
+  type SubPage,
+  MAX_PHOTO_SIZE,
+  ALLOWED_IMAGE_TYPES,
+  sanitize,
+  getTier,
+  getSubPageTitle,
+  getSubPageBack,
+} from '@/components/profile/profileUtils';
 
 const tiers = [
   { min: 0, label: 'Bronze', color: 'text-arena-amber', icon: Star },
@@ -20,15 +28,7 @@ const tiers = [
   { min: 7000, label: 'Platinum', color: 'text-primary', icon: Crown },
 ];
 
-function getTier(points: number) {
-  return [...tiers].reverse().find((t) => points >= t.min) || tiers[0];
-}
-
-const mockPastOrders: (Order & { date: string })[] = [
-  { id: 'past-001', items: [{ id: 'm1', name: 'Stadium Burger', description: '', price: 14.99, category: 'food', image: '🍔', quantity: 2, popular: true }, { id: 'm3', name: 'Craft IPA', description: '', price: 12.99, category: 'drinks', image: '🍺', quantity: 2 }], total: 55.96, status: 'delivered', deliveryType: 'seat', estimatedMinutes: 0, date: '2026-04-05' },
-  { id: 'past-002', items: [{ id: 'm4', name: 'Loaded Nachos', description: '', price: 11.99, category: 'food', image: '🧀', quantity: 1 }, { id: 'm7', name: 'Fresh Lemonade', description: '', price: 6.99, category: 'drinks', image: '🍋', quantity: 3 }], total: 32.96, status: 'delivered', deliveryType: 'pickup', estimatedMinutes: 0, date: '2026-04-02' },
-  { id: 'past-003', items: [{ id: 'm9', name: 'Team Jersey', description: '', price: 89.99, category: 'merch', image: '👕', quantity: 1 }], total: 89.99, status: 'delivered', deliveryType: 'seat', estimatedMinutes: 0, date: '2026-03-28' },
-];
+// mockPastOrders imported from @/data/pastOrders
 
 const menuItems = [
   { id: 'addresses', label: 'Saved Addresses & Seats', icon: MapPin, desc: 'Default seat numbers & venues', color: 'text-primary' },
@@ -43,7 +43,7 @@ export default function ProfilePage() {
   const { bookedEvents } = useBookingStore();
   const { toast } = useToast();
   const [subPage, setSubPage] = useState<SubPage>(null);
-  const tier = getTier(user.arenaPoints);
+  const tier = getTier(user.arenaPoints, tiers);
   const TierIcon = tier.icon;
   const nextTier = tiers.find((t) => t.min > user.arenaPoints);
   const progress = nextTier ? ((user.arenaPoints - tier.min) / (nextTier.min - tier.min)) * 100 : 100;
@@ -82,10 +82,8 @@ export default function ProfilePage() {
     flashSales: false,
   });
 
-  // Settings state
-  const [darkMode, setDarkMode] = useState(true);
-  const [hapticFeedback, setHapticFeedback] = useState(true);
-  const [autoPlay, setAutoPlay] = useState(false);
+  // Settings state — persisted in localStorage for cross-session retention
+  const [darkMode, setDarkMode] = useState(() => localStorage.getItem('sanchara-dark-mode') !== 'false');
   const [showLogout, setShowLogout] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   
@@ -95,10 +93,11 @@ export default function ProfilePage() {
   useEffect(() => {
     if (darkMode) document.documentElement.classList.add('dark');
     else document.documentElement.classList.remove('dark');
+    localStorage.setItem('sanchara-dark-mode', String(darkMode));
   }, [darkMode]);
 
   const handleSaveProfile = () => {
-    updateUserName(editName);
+    updateUserName(sanitize(editName));
     setEditSaved(true);
     toast({ title: '✅ Profile Updated', description: 'Your changes have been saved.' });
     setTimeout(() => setEditSaved(false), 2000);
@@ -149,19 +148,35 @@ export default function ProfilePage() {
     fileInputRef.current?.click();
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        const base64 = reader.result as string;
-        setProfilePic(base64);
-        localStorage.setItem('sanchara-profile-pic', base64);
-        toast({ title: '📸 Photo Uploaded', description: 'Your profile picture has been saved locally.' });
-      };
-      reader.readAsDataURL(file);
+    if (!file) return;
+
+    // Validate file type
+    if (!ALLOWED_IMAGE_TYPES.includes(file.type)) {
+      toast({ title: '❌ Invalid Format', description: 'Please upload a JPEG, PNG, WebP, or GIF image.', variant: 'destructive' });
+      return;
     }
-  };
+
+    // Validate file size
+    if (file.size > MAX_PHOTO_SIZE) {
+      toast({ title: '❌ File Too Large', description: `Max size is ${MAX_PHOTO_SIZE / 1024}KB. Your file is ${Math.round(file.size / 1024)}KB.`, variant: 'destructive' });
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      const base64 = reader.result as string;
+      setProfilePic(base64);
+      try {
+        localStorage.setItem('sanchara-profile-pic', base64);
+      } catch {
+        toast({ title: '⚠️ Storage Full', description: 'Could not save photo locally. Try a smaller image.', variant: 'destructive' });
+      }
+      toast({ title: '📸 Photo Uploaded', description: 'Your profile picture has been saved locally.' });
+    };
+    reader.readAsDataURL(file);
+  }, [toast]);
 
   const handleSetDefaultAddress = (id: string) => {
     setAddresses((prev) => prev.map((a) => ({ ...a, isDefault: a.id === id })));
@@ -204,9 +219,17 @@ export default function ProfilePage() {
     toast({ title: '💬 Support Chat', description: 'A support agent will be with you shortly. Ticket #SUP-' + Math.floor(Math.random() * 9000 + 1000) });
   };
 
+  /** Wipe all local data and reset state to simulate full account deletion */
   const handleDeleteAccount = () => {
     setShowDeleteConfirm(false);
-    toast({ title: '⚠️ Account Deletion Requested', description: 'You will receive a confirmation email within 24 hours.', variant: 'destructive' });
+    // Clear all persisted data
+    localStorage.removeItem('sanchara-arena-storage');
+    localStorage.removeItem('sanchara-profile-pic');
+    localStorage.removeItem('sanchara-daily-drop-date');
+    localStorage.removeItem('sanchara-dark-mode');
+    localStorage.removeItem('sanchara-booking-storage');
+    toast({ title: '⚠️ Account Deleted', description: 'All data has been removed. Reloading...', variant: 'destructive' });
+    setTimeout(() => window.location.reload(), 1500);
   };
 
   const toggleNotif = (key: keyof typeof notifSettings) => {
@@ -635,29 +658,6 @@ export default function ProfilePage() {
                   {darkMode ? <ToggleRight size={28} className="text-primary" /> : <ToggleLeft size={28} className="text-muted-foreground" />}
                 </button>
               </div>
-              <div className="flex items-center justify-between px-4 py-3">
-                <div className="flex items-center gap-3">
-                  <Smartphone size={18} className="text-muted-foreground" />
-                  <span className="text-sm text-foreground">Haptic Feedback</span>
-                </div>
-                <button onClick={() => { 
-                  const next = !hapticFeedback;
-                  setHapticFeedback(next); 
-                  if (next && navigator.vibrate) navigator.vibrate([30]);
-                  toast({ title: 'Haptic Feedback', description: next ? 'Enabled' : 'Disabled' }); 
-                }}>
-                  {hapticFeedback ? <ToggleRight size={28} className="text-primary" /> : <ToggleLeft size={28} className="text-muted-foreground" />}
-                </button>
-              </div>
-              <div className="flex items-center justify-between px-4 py-3">
-                <div className="flex items-center gap-3">
-                  <Globe size={18} className="text-muted-foreground" />
-                  <span className="text-sm text-foreground">Auto-play Videos</span>
-                </div>
-                <button onClick={() => { setAutoPlay(!autoPlay); toast({ title: 'Auto-play', description: autoPlay ? 'Disabled' : 'Enabled' }); }}>
-                  {autoPlay ? <ToggleRight size={28} className="text-primary" /> : <ToggleLeft size={28} className="text-muted-foreground" />}
-                </button>
-              </div>
             </div>
 
             <div className="glass-card p-4">
@@ -763,30 +763,9 @@ export default function ProfilePage() {
     }
   };
 
-  const getSubPageTitle = () => {
-    switch (subPage) {
-      case 'editProfile': return 'Edit Profile';
-      case 'changePassword': return 'Change Password';
-      case 'addPayment': return 'Add Payment Method';
-      case 'addresses': return 'Saved Addresses & Seats';
-      case 'payments': return 'Payment Methods';
-      case 'tickets': return 'My Tickets & Bookings';
-      case 'pastOrders': return 'Past Orders';
-      case 'notifications': return 'Notifications';
-      case 'settings': return 'App Settings';
-      case 'help': return 'Help Center';
-      case 'privacyPolicy': return 'Privacy Policy';
-      case 'termsOfService': return 'Terms of Service';
-      default: return '';
-    }
-  };
+  const getTitle = () => getSubPageTitle(subPage);
 
-  const getSubPageBack = (): SubPage => {
-    if (subPage === 'changePassword') return 'editProfile';
-    if (subPage === 'addPayment') return 'payments';
-    if (subPage === 'privacyPolicy' || subPage === 'termsOfService') return 'settings';
-    return null;
-  };
+  const getBack = (): SubPage => getSubPageBack(subPage);
 
   return (
     <>
@@ -904,7 +883,7 @@ export default function ProfilePage() {
               <p className="text-sm text-muted-foreground">You'll need to sign in again to access your account and Arena Points.</p>
               <div className="flex gap-3">
                 <button onClick={() => setShowLogout(false)} className="flex-1 py-2.5 rounded-xl glass-card text-sm font-semibold text-foreground">Cancel</button>
-                <button onClick={() => { setShowLogout(false); toast({ title: '👋 Signed Out', description: 'You have been signed out successfully.' }); }} className="flex-1 py-2.5 rounded-xl bg-destructive text-destructive-foreground text-sm font-semibold">Sign Out</button>
+                <button onClick={() => { setShowLogout(false); localStorage.removeItem('sanchara-arena-storage'); localStorage.removeItem('sanchara-booking-storage'); toast({ title: '👋 Signed Out', description: 'You have been signed out. Reloading...' }); setTimeout(() => window.location.reload(), 1000); }} className="flex-1 py-2.5 rounded-xl bg-destructive text-destructive-foreground text-sm font-semibold">Sign Out</button>
               </div>
             </motion.div>
           </motion.div>
@@ -948,7 +927,7 @@ export default function ProfilePage() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm"
-            onClick={() => setSubPage(getSubPageBack())}
+            onClick={() => setSubPage(getBack())}
           >
             <motion.div
               initial={{ x: '100%' }}
@@ -959,10 +938,10 @@ export default function ProfilePage() {
               className="absolute top-0 right-0 bottom-0 w-full max-w-md glass-card-elevated overflow-y-auto"
             >
               <div className="sticky top-0 z-10 glass-card-elevated p-4 flex items-center gap-3 border-b border-border/30">
-                <button onClick={() => setSubPage(getSubPageBack())} className="w-8 h-8 rounded-full bg-secondary/50 flex items-center justify-center text-muted-foreground hover:text-foreground">
+                <button onClick={() => setSubPage(getBack())} className="w-8 h-8 rounded-full bg-secondary/50 flex items-center justify-center text-muted-foreground hover:text-foreground">
                   <ArrowLeft size={16} />
                 </button>
-                <h2 className="text-base font-display font-semibold text-foreground">{getSubPageTitle()}</h2>
+                <h2 className="text-base font-display font-semibold text-foreground">{getTitle()}</h2>
               </div>
               <div className="p-4">
                 {renderSubPageContent()}

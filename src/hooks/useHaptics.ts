@@ -1,16 +1,35 @@
 import { useCallback } from 'react';
 
-// Singleton for audio context to prevent multiple instances
+/**
+ * Singleton AudioContext to prevent multiple browser audio instances.
+ * Lazily initialized on first use.
+ */
 let audioCtx: AudioContext | null = null;
 
+/** Get or create the shared AudioContext instance */
 const getAudioContext = () => {
   if (typeof window === 'undefined') return null;
   if (!audioCtx) {
-    audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
+    audioCtx = new (window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext)();
   }
   return audioCtx;
 };
 
+/**
+ * Hook providing haptic feedback (vibration) and audio chime capabilities.
+ *
+ * Uses the Web Vibration API and Web Audio API to create tactile/audio feedback
+ * for user interactions. Gracefully degrades on unsupported devices.
+ *
+ * @returns Object with `playChime` and `vibrate` functions
+ *
+ * @example
+ * ```tsx
+ * const { playChime, vibrate } = useHaptics();
+ * playChime('success'); // Plays ascending tone + vibration
+ * vibrate(50);          // Quick vibration pulse
+ * ```
+ */
 export function useHaptics() {
   const vibrate = useCallback((pattern: number | number[]) => {
     if (typeof window !== 'undefined' && navigator.vibrate) {

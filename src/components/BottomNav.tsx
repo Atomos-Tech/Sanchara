@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion';
 import { Home, Compass, Map, ShoppingBag, Wallet, Bell, User } from 'lucide-react';
 import { useArenaStore } from '@/stores/arenaStore';
+import { memo } from 'react';
 
 const tabs = [
   { id: 'home', label: 'Home', icon: Home },
@@ -11,14 +12,18 @@ const tabs = [
   { id: 'profile', label: 'Profile', icon: User },
 ];
 
-export default function BottomNav() {
+export default memo(function BottomNav() {
   const { activeTab, setActiveTab, alerts, cart } = useArenaStore();
   const unreadAlerts = alerts.filter((a) => !a.read).length;
   const cartCount = cart.reduce((s, c) => s + c.quantity, 0);
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 glass-card border-t border-border/50 backdrop-blur-2xl safe-area-bottom">
-      <div className="flex items-center justify-around px-1 py-2 max-w-lg mx-auto">
+    <nav
+      className="fixed bottom-0 left-0 right-0 z-50 glass-card border-t border-border/50 backdrop-blur-2xl safe-area-bottom shadow-lg"
+      role="tablist"
+      aria-label="Main navigation"
+    >
+      <div className="flex items-center justify-around px-2 py-2.5 max-w-lg mx-auto">
         {tabs.map((tab) => {
           const isActive = activeTab === tab.id;
           const Icon = tab.icon;
@@ -28,26 +33,37 @@ export default function BottomNav() {
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className="relative flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-xl transition-colors"
+              role="tab"
+              aria-selected={isActive}
+              aria-current={isActive ? 'page' : undefined}
+              aria-label={`${tab.label}${badge > 0 ? `, ${badge} items in cart` : ''}`}
+              title={tab.label}
+              className="relative flex flex-col items-center justify-center gap-1 px-4 py-2 rounded-xl transition-all duration-300"
             >
               {isActive && (
                 <motion.div
                   layoutId="activeTab"
-                  className="absolute inset-0 rounded-xl bg-primary/10"
-                  transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+                  className="absolute inset-0 rounded-xl bg-primary/10 border border-primary/20 pointer-events-none"
+                  transition={{ type: 'spring', stiffness: 500, damping: 35 }}
                 />
               )}
               <Icon
-                size={20}
-                className={`relative z-10 transition-colors ${isActive ? 'text-primary' : 'text-muted-foreground'}`}
+                size={22}
+                className={`relative z-10 transition-transform duration-300 ${isActive ? 'text-primary scale-110' : 'text-muted-foreground scale-100'}`}
+                aria-hidden="true"
               />
-              <span className={`relative z-10 text-[9px] font-medium ${isActive ? 'text-primary' : 'text-muted-foreground'}`}>
+              <span className={`relative z-10 text-[10px] font-bold tracking-tight transition-colors duration-300 ${isActive ? 'text-primary' : 'text-muted-foreground'}`}>
                 {tab.label}
               </span>
               {badge > 0 && (
-                <span className="absolute -top-0.5 right-1 z-20 flex h-4 w-4 items-center justify-center rounded-full bg-accent text-[9px] font-bold text-accent-foreground">
+                <motion.span
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  className="absolute -top-1 right-2 z-20 flex h-4.5 w-4.5 items-center justify-center rounded-full bg-accent text-[9px] font-black text-accent-foreground border-2 border-background"
+                  aria-hidden="true"
+                >
                   {badge}
-                </span>
+                </motion.span>
               )}
             </button>
           );
@@ -56,29 +72,41 @@ export default function BottomNav() {
         {/* Alerts button */}
         <button
           onClick={() => setActiveTab('alerts')}
-          className="relative flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-xl transition-colors"
+          role="tab"
+          aria-selected={activeTab === 'alerts'}
+          aria-current={activeTab === 'alerts' ? 'page' : undefined}
+          aria-label={`Alerts${unreadAlerts > 0 ? `, ${unreadAlerts} unread alert notifications` : ''}`}
+          title="Alerts"
+          className="relative flex flex-col items-center justify-center gap-1 px-4 py-2 rounded-xl transition-all duration-300"
         >
           {activeTab === 'alerts' && (
             <motion.div
               layoutId="activeTab"
-              className="absolute inset-0 rounded-xl bg-primary/10"
-              transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+              className="absolute inset-0 rounded-xl bg-primary/10 border border-primary/20 pointer-events-none"
+              transition={{ type: 'spring', stiffness: 500, damping: 35 }}
             />
           )}
           <Bell
-            size={20}
-            className={`relative z-10 transition-colors ${activeTab === 'alerts' ? 'text-primary' : 'text-muted-foreground'}`}
+            size={22}
+            className={`relative z-10 transition-transform duration-300 ${activeTab === 'alerts' ? 'text-primary scale-110' : 'text-muted-foreground scale-100'}`}
+            aria-hidden="true"
           />
-          <span className={`relative z-10 text-[9px] font-medium ${activeTab === 'alerts' ? 'text-primary' : 'text-muted-foreground'}`}>
+          <span className={`relative z-10 text-[10px] font-bold tracking-tight transition-colors duration-300 ${activeTab === 'alerts' ? 'text-primary' : 'text-muted-foreground'}`}>
             Alerts
           </span>
           {unreadAlerts > 0 && (
-            <span className="absolute -top-0.5 right-1 z-20 flex h-4 w-4 items-center justify-center rounded-full bg-destructive text-[9px] font-bold text-destructive-foreground">
+            <motion.span
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              className="absolute -top-1 right-2 z-20 flex h-4.5 w-4.5 items-center justify-center rounded-full bg-destructive text-[9px] font-black text-destructive-foreground border-2 border-background"
+              aria-hidden="true"
+            >
               {unreadAlerts}
-            </span>
+            </motion.span>
           )}
         </button>
       </div>
     </nav>
   );
-}
+});
+

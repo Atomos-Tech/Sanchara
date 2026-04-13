@@ -1,6 +1,6 @@
-import { motion, AnimatePresence, useMotionValue, useTransform, animate } from 'framer-motion';
+import { motion, AnimatePresence, useMotionValue, animate } from 'framer-motion';
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { X, Navigation2, MapPin, ChevronDown, Camera } from 'lucide-react';
+import { X, Navigation2, ChevronDown, Camera } from 'lucide-react';
 import { useHaptics } from '@/hooks/useHaptics';
 
 // Stadium POI coordinates on SVG viewBox (0-400 x 0-300)

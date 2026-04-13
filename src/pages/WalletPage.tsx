@@ -8,7 +8,7 @@ import { useToast } from '@/hooks/use-toast';
 const catFilters = ['all', 'food', 'upgrade', 'merch', 'experience'] as const;
 
 export default function WalletPage() {
-  const { user, spendPoints, claimReward, userRewards, activeTab, setActiveTab } = useArenaStore();
+  const { user, spendPoints, claimReward, userRewards } = useArenaStore();
   const [activeFilter, setActiveFilter] = useState<typeof catFilters[number]>('all');
   const [view, setView] = useState<'store' | 'my-rewards'>('store');
   const { toast } = useToast();

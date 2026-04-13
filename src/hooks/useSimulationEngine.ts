@@ -5,6 +5,11 @@ import type { Facility, GateSuggestion } from '@/types/arena';
 import { toast } from 'sonner';
 import { useArenaStore } from '@/stores/arenaStore';
 
+/**
+ * Simulation state store for real-time venue data updates.
+ * Separated from the hook to follow Zustand best practices (stores ≠ hooks).
+ */
+
 interface SimulationState {
   facilities: Facility[];
   gates: GateSuggestion[];
@@ -71,7 +76,7 @@ export function useSimulationEngine() {
       if (activeOrders.length > 0 && Math.random() < 0.6) {
         const orderToProgress = activeOrders[Math.floor(Math.random() * activeOrders.length)];
         progressOrderStatus(orderToProgress.id);
-        const states = { preparing: 'Ready', ready: 'On the way', delivering: 'Delivered' };
+        const states: Record<string, string> = { preparing: 'Ready', ready: 'On the way', delivering: 'Delivered', delivered: 'Completed' };
         // We use the OLD status to look up what it *became*
         toast(`Order #${orderToProgress.id.slice(-6)} update: ${states[orderToProgress.status]}`, {
           duration: 4000,

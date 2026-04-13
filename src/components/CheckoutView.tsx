@@ -1,4 +1,4 @@
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { useState } from 'react';
 import { Tag, X, CheckCircle, PartyPopper, Ticket, ShoppingBag, Truck, Shield } from 'lucide-react';
 import { useBookingStore } from '@/stores/bookingStore';

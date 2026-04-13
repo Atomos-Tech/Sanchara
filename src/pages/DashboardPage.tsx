@@ -22,12 +22,28 @@ export default function DashboardPage() {
   const { bookedEvents } = useBookingStore();
   const [dailyPoints, setDailyPoints] = useState<number | null>(null);
   const [showDrop, setShowDrop] = useState(false);
-  const [showQR, setShowQR] = useState<any>(null);
+  const [showQR, setShowQR] = useState<{ eventName?: string; name?: string; venue?: string; section?: string; row?: string; seat?: string } | null>(null);
   const [geoStatus, setGeoStatus] = useState<'checking' | 'inside' | 'outside' | 'denied' | null>(null);
-  const { playChime, vibrate } = useHaptics();
+  const { playChime } = useHaptics();
 
   const rotateX = useMotionValue(0);
   const rotateY = useMotionValue(0);
+
+  // Move useTransform to component top level (React hooks rule)
+  const shimmerX = useTransform(rotateY, [-15, 15], [100, -100]);
+  const shimmerY = useTransform(rotateX, [-15, 15], [50, -50]);
+
+  // Check if daily drop should reset (new day)
+  useEffect(() => {
+    const today = new Date().toISOString().split('T')[0];
+    const lastClaim = localStorage.getItem('sanchara-daily-drop-date');
+    if (lastClaim !== today && user.dailyDropClaimed) {
+      // Reset the claimed state for the new day
+      useArenaStore.setState((state) => ({
+        user: { ...state.user, dailyDropClaimed: false },
+      }));
+    }
+  }, [user.dailyDropClaimed]);
 
   useEffect(() => {
     const handleOrientation = (e: DeviceOrientationEvent) => {
@@ -40,10 +56,11 @@ export default function DashboardPage() {
       }
     };
 
-    // Need permission on iOS 13+
+    // Need permission on iOS 13+ (requestPermission is non-standard)
     const requestAccess = () => {
-      if (typeof (DeviceOrientationEvent as any).requestPermission === 'function') {
-        (DeviceOrientationEvent as any).requestPermission().then((p: string) => {
+      const DOE = DeviceOrientationEvent as unknown as { requestPermission?: () => Promise<string> };
+      if (typeof DOE.requestPermission === 'function') {
+        DOE.requestPermission().then((p: string) => {
           if (p === 'granted') window.addEventListener('deviceorientation', handleOrientation);
         }).catch(console.error);
       } else {
@@ -55,14 +72,34 @@ export default function DashboardPage() {
     return () => window.removeEventListener('deviceorientation', handleOrientation);
   }, [rotateX, rotateY]);
 
+  // Venue coordinates (Crypto.com Arena, Los Angeles)
+  const VENUE_LAT = 34.0430;
+  const VENUE_LNG = -118.2673;
+  const GEOFENCE_RADIUS_M = 500; // 500 meters = "inside"
+
   useEffect(() => {
     if ('geolocation' in navigator) {
       setGeoStatus('checking');
       navigator.geolocation.getCurrentPosition(
-        () => {
-          // Authentic mock: Assuming if they grant permission, we welcome them.
-          setGeoStatus('inside');
-          toast('📍 Welcome to the Arena!', { description: 'Venue location verified. Interactive features unlocked.' });
+        (pos) => {
+          // Haversine formula to calculate distance in meters
+          const toRad = (deg: number) => deg * Math.PI / 180;
+          const R = 6371000; // Earth radius in meters
+          const dLat = toRad(pos.coords.latitude - VENUE_LAT);
+          const dLng = toRad(pos.coords.longitude - VENUE_LNG);
+          const a = Math.sin(dLat / 2) ** 2 +
+            Math.cos(toRad(VENUE_LAT)) * Math.cos(toRad(pos.coords.latitude)) *
+            Math.sin(dLng / 2) ** 2;
+          const distance = R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+          if (distance <= GEOFENCE_RADIUS_M) {
+            setGeoStatus('inside');
+            toast('📍 Welcome to the Arena!', { description: 'Venue location verified. Interactive features unlocked.' });
+          } else {
+            // For demo purposes, show as "inside" to demonstrate full features
+            setGeoStatus('inside');
+            toast('📍 Location Detected', { description: `${Math.round(distance / 1000)}km from venue. Demo mode enabled.` });
+          }
         },
         () => setGeoStatus('denied')
       );
@@ -108,10 +145,7 @@ export default function DashboardPage() {
           {/* Shimmer overlay layer moving opposite to device tilt */}
           <motion.div 
             className="absolute inset-0 bg-gradient-to-tr from-white/0 via-white/20 to-white/0 mix-blend-overlay pointer-events-none"
-            style={{ 
-              x: useTransform(rotateY, [-15, 15], [100, -100]), 
-              y: useTransform(rotateX, [-15, 15], [50, -50]) 
-            }}
+            style={{ x: shimmerX, y: shimmerY }}
           />
           <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full -mr-12 -mt-12" style={{ transform: 'translateZ(10px)' }} />
           <div className="relative" style={{ transform: 'translateZ(20px)' }}>
@@ -173,9 +207,10 @@ export default function DashboardPage() {
           <button
             key={action.tab}
             onClick={() => setActiveTab(action.tab)}
+            aria-label={`Go to ${action.label}`}
             className="glass-card p-3 text-center hover:bg-secondary/30 transition-colors touch-feedback"
           >
-            <span className="text-xl block mb-1">{action.icon}</span>
+            <span className="text-xl block mb-1" role="img" aria-hidden="true">{action.icon}</span>
             <span className="text-[10px] font-medium text-muted-foreground">{action.label}</span>
           </button>
         ))}
@@ -205,8 +240,12 @@ export default function DashboardPage() {
                 <span className="text-sm text-muted-foreground">{bestGate.distance}</span>
               </div>
             </div>
-            <span className="px-2 py-1 rounded-full text-xs font-medium bg-arena-green/15 text-arena-green">
-              Clear
+            <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+              bestGate.crowdLevel === 'low' ? 'bg-arena-green/15 text-arena-green' :
+              bestGate.crowdLevel === 'moderate' ? 'bg-arena-yellow/15 text-arena-yellow' :
+              'bg-arena-red/15 text-arena-red'
+            }`}>
+              {bestGate.crowdLevel === 'low' ? 'Clear' : bestGate.crowdLevel === 'moderate' ? 'Moderate' : 'Busy'}
             </span>
           </div>
 
@@ -375,10 +414,11 @@ export default function DashboardPage() {
               </div>
 
               <div className="my-8 aspect-square rounded-2xl bg-white p-4 flex items-center justify-center mx-auto w-[240px]">
-                {/* Fallback QR representation since we don't have a real QR library in free tier */}
-                <div className="w-full h-full border-4 border-black border-dashed flex items-center justify-center bg-gray-100/50">
-                  <QrCode size={100} className="text-black/80" />
-                </div>
+                <img 
+                  src={`https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=${encodeURIComponent(JSON.stringify(showQR))}`}
+                  alt="Scannable QR Code"
+                  className="w-full h-full object-contain"
+                />
               </div>
 
               <div className="grid grid-cols-2 gap-4 text-center border-t border-border/50 pt-4">

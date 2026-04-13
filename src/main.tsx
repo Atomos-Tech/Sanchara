@@ -1,6 +1,10 @@
 import { createRoot } from "react-dom/client";
 import App from "./App.tsx";
 import "./index.css";
+import { initFirebase } from "./lib/firebase";
+
+// Initialize Firebase services (Analytics, etc.) — free Spark plan
+initFirebase();
 
 createRoot(document.getElementById("root")!).render(<App />);
 

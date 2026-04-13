@@ -1,9 +1,10 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { mockMenu } from '@/data/mockData';
+import { mockPastOrders } from '@/data/pastOrders';
 import { useArenaStore } from '@/stores/arenaStore';
 import { useState, useEffect } from 'react';
-import { Plus, Minus, ShoppingBag, Truck, Store, ChevronRight, Clock, Package, ChefHat, MapPin, RotateCcw, CheckCircle2, Search } from 'lucide-react';
-import type { MenuItem, Order } from '@/types/arena';
+import { Plus, Minus, ShoppingBag, Truck, Store, ChevronRight, Clock, Package, ChefHat, RotateCcw, CheckCircle2, Search } from 'lucide-react';
+import type { Order } from '@/types/arena';
 import { useToast } from '@/hooks/use-toast';
 
 const categories = ['food', 'drinks', 'merch'] as const;
@@ -11,11 +12,7 @@ const catLabels = { food: '🍔 Food', drinks: '🍺 Drinks', merch: '👕 Merch
 
 const orderTabs = ['menu', 'active', 'past'] as const;
 
-const mockPastOrders: (Order & { date: string })[] = [
-  { id: 'past-001', items: [{ id: 'm1', name: 'Stadium Burger', description: '', price: 14.99, category: 'food', image: '🍔', quantity: 2, popular: true }, { id: 'm3', name: 'Craft IPA', description: '', price: 12.99, category: 'drinks', image: '🍺', quantity: 2 }], total: 55.96, status: 'delivered', deliveryType: 'seat', estimatedMinutes: 0, date: '2026-04-05' },
-  { id: 'past-002', items: [{ id: 'm4', name: 'Loaded Nachos', description: '', price: 11.99, category: 'food', image: '🧀', quantity: 1 }, { id: 'm7', name: 'Fresh Lemonade', description: '', price: 6.99, category: 'drinks', image: '🍋', quantity: 3 }], total: 32.96, status: 'delivered', deliveryType: 'pickup', estimatedMinutes: 0, date: '2026-04-02' },
-  { id: 'past-003', items: [{ id: 'm9', name: 'Team Jersey', description: '', price: 89.99, category: 'merch', image: '👕', quantity: 1 }], total: 89.99, status: 'delivered', deliveryType: 'seat', estimatedMinutes: 0, date: '2026-03-28' },
-];
+
 
 const timelineSteps = [
   { key: 'preparing', label: 'Preparing', icon: ChefHat },
@@ -29,14 +26,19 @@ function getStepIndex(status: string) {
   return idx >= 0 ? idx : 0;
 }
 
-function ETACountdown({ minutes }: { minutes: number }) {
+/** Countdown timer that stops when order is delivered */
+function ETACountdown({ minutes, status }: { minutes: number; status: string }) {
   const [remaining, setRemaining] = useState(minutes * 60);
 
   useEffect(() => {
-    if (remaining <= 0) return;
+    if (remaining <= 0 || status === 'delivered') return;
     const t = setInterval(() => setRemaining((r) => Math.max(0, r - 1)), 1000);
     return () => clearInterval(t);
-  }, [remaining]);
+  }, [remaining, status]);
+
+  if (status === 'delivered') {
+    return <span className="text-sm font-bold text-arena-green font-display">Delivered ✓</span>;
+  }
 
   const mins = Math.floor(remaining / 60);
   const secs = remaining % 60;
@@ -48,23 +50,28 @@ function ETACountdown({ minutes }: { minutes: number }) {
 }
 
 export default function OrderPage() {
-  const { cart, orders, addToCart, removeFromCart, updateCartQuantity, placeOrder } = useArenaStore();
+  const { cart, orders, addToCart, updateCartQuantity, placeOrder } = useArenaStore();
   const { toast } = useToast();
   const [activeCategory, setActiveCategory] = useState<typeof categories[number]>('food');
   const [showCart, setShowCart] = useState(false);
   const [activeTab, setActiveTab] = useState<typeof orderTabs[number]>('menu');
   const [searchQuery, setSearchQuery] = useState('');
+  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
+
+  useEffect(() => {
+    const handler = setTimeout(() => setDebouncedSearchQuery(searchQuery), 300);
+    return () => clearTimeout(handler);
+  }, [searchQuery]);
 
   const allItems = mockMenu.filter((m) => m.category === activeCategory);
-  const items = searchQuery
-    ? allItems.filter((m) => m.name.toLowerCase().includes(searchQuery.toLowerCase()))
+  const items = debouncedSearchQuery
+    ? allItems.filter((m) => m.name.toLowerCase().includes(debouncedSearchQuery.toLowerCase()))
     : allItems;
   const cartTotal = cart.reduce((s, c) => s + c.price * c.quantity, 0);
   const cartCount = cart.reduce((s, c) => s + c.quantity, 0);
   const getCartQty = (id: string) => cart.find((c) => c.id === id)?.quantity || 0;
 
   const activeOrders = orders.filter((o) => o.status !== 'delivered');
-  const hasActive = activeOrders.length > 0;
 
   const handleReorder = (order: Order) => {
     order.items.forEach((item) => {
@@ -228,7 +235,7 @@ export default function OrderPage() {
                   </div>
                   <div className="flex items-center gap-2">
                     <Clock size={14} className="text-primary" />
-                    <ETACountdown minutes={order.estimatedMinutes} />
+                    <ETACountdown minutes={order.estimatedMinutes} status={order.status} />
                   </div>
                 </div>
 

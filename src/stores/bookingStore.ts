@@ -3,24 +3,37 @@ import { persist } from 'zustand/middleware';
 import type { CalendarEvent, SeatingTier, PreOrderItem } from '@/types/booking';
 import type { MenuItem } from '@/types/arena';
 import { promoCodes } from '@/data/bookingData';
+import { trackEvent } from '@/lib/firebase';
 
+/**
+ * Booking store interface defining state and actions for the event booking flow.
+ *
+ * The booking flow is a multi-step process:
+ * 1. Select event → 2. Choose seating tier → 3. Add pre-orders → 4. Checkout
+ *
+ * Promo codes provide percentage or fixed discounts.
+ * Booked events are persisted to localStorage.
+ */
 interface BookingStore {
-  // Booking flow
+  /** Currently selected event for booking, null if none */
   selectedEvent: CalendarEvent | null;
+  /** Selected seating tier within the event */
   selectedTier: SeatingTier | null;
+  /** Number of tickets (clamped 1-10) */
   ticketQuantity: number;
+  /** Pre-order food/merch items tied to this booking */
   preOrderItems: PreOrderItem[];
-  bookingStep: number; // 0=none, 1=ticketing, 2=upsell, 3=checkout
-  
-  // Promo
+  /** Current booking step: 0=none, 1=ticketing, 2=upsell, 3=checkout */
+  bookingStep: number;
+  /** Applied promo code string */
   promoCode: string;
+  /** Promo discount value (percentage or fixed amount) */
   promoDiscount: number;
+  /** Human-readable promo label (e.g., '10% Off') */
   promoLabel: string;
-  
-  // Booked events (post-checkout)
+  /** Events that have been booked/confirmed */
   bookedEvents: CalendarEvent[];
 
-  // Actions
   selectEvent: (event: CalendarEvent) => void;
   selectTier: (tier: SeatingTier) => void;
   setTicketQuantity: (qty: number) => void;
@@ -28,13 +41,20 @@ interface BookingStore {
   addPreOrderItem: (item: MenuItem) => void;
   removePreOrderItem: (itemId: string) => void;
   updatePreOrderQuantity: (itemId: string, qty: number) => void;
+  /** Apply a promo code. Returns true if valid, false if not found. */
   applyPromo: (code: string) => boolean;
   clearPromo: () => void;
+  /** Calculate ticket subtotal (tier price × quantity) */
   getTicketTotal: () => number;
+  /** Calculate pre-order subtotal */
   getPreOrderTotal: () => number;
+  /** Calculate discount amount based on applied promo */
   getDiscountAmount: () => number;
+  /** Calculate final total after discount */
   getGrandTotal: () => number;
+  /** Confirm booking and move event to bookedEvents list */
   confirmBooking: () => void;
+  /** Reset all booking state to initial values */
   resetBooking: () => void;
 }
 
@@ -107,9 +127,11 @@ export const useBookingStore = create<BookingStore>()(
     return Math.max(0, state.getTicketTotal() + state.getPreOrderTotal() - state.getDiscountAmount());
   },
 
+  /** Confirm the current booking, persist the event, and reset flow state */
   confirmBooking: () => {
     const { selectedEvent } = get();
     if (selectedEvent) {
+      trackEvent('confirm_booking', { event_name: selectedEvent.name, event_id: selectedEvent.id });
       set((state) => ({
         bookedEvents: [...state.bookedEvents, selectedEvent],
         selectedEvent: null,
