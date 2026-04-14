@@ -243,10 +243,11 @@ export default function ProfilePage() {
         return (
           <div className="space-y-4">
             <div className="glass-card p-5 text-center">
-              <input type="file" ref={fileInputRef} onChange={handleFileChange} accept="image/*" className="hidden" />
+              <label htmlFor="profile-image-upload" className="sr-only">Upload profile image</label>
+              <input id="profile-image-upload" type="file" ref={fileInputRef} onChange={handleFileChange} accept="image/*" className="hidden" />
               <div className="w-20 h-20 rounded-full bg-primary/15 mx-auto mb-3 flex items-center justify-center border-2 border-primary/30 relative overflow-hidden">
                 {profilePic ? (
-                  <img src={profilePic} alt="Profile" className="w-full h-full object-cover" />
+                  <img src={profilePic} alt={`Profile picture for ${user.name}`} className="w-full h-full object-cover" />
                 ) : (
                   <User size={36} className="text-primary" />
                 )}
@@ -775,7 +776,7 @@ export default function ProfilePage() {
           <div className="relative inline-block">
             <div className="w-20 h-20 rounded-full bg-primary/15 mx-auto mb-3 flex items-center justify-center border-2 border-primary/30 overflow-hidden">
               {profilePic ? (
-                <img src={profilePic} alt="Profile" className="w-full h-full object-cover" />
+                <img src={profilePic} alt={`Profile picture for ${user.name}`} className="w-full h-full object-cover" />
               ) : (
                 <User size={36} className="text-primary" />
               )}

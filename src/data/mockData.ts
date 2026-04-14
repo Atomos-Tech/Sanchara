@@ -64,6 +64,7 @@ export const mockOrders: Order[] = [
     status: 'preparing',
     deliveryType: 'seat',
     estimatedMinutes: 12,
+    createdAt: Date.now(),
   },
 ];
 

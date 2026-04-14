@@ -116,6 +116,7 @@ export const useArenaStore = create<ArenaState>()(
       status: 'preparing',
       deliveryType,
       estimatedMinutes: deliveryType === 'seat' ? 15 : 8,
+      createdAt: Date.now(),
     };
     set((state) => ({
       orders: [newOrder, ...state.orders],
@@ -206,6 +207,20 @@ export const useArenaStore = create<ArenaState>()(
       partialize: (state) => Object.fromEntries(
         Object.entries(state).filter(([key]) => !['savedPayments'].includes(key))
       ),
+      onRehydrateStorage: () => (state) => {
+        if (state) {
+          const now = Date.now();
+          state.orders = state.orders.map(order => {
+            if (order.status === 'delivered' || !order.createdAt) return order;
+            const elapsedSecs = (now - order.createdAt) / 1000;
+            // Catch up order status based on elapsed time while app was closed
+            if (elapsedSecs > 45) return { ...order, status: 'delivered' };
+            if (elapsedSecs > 30) return { ...order, status: 'delivering' };
+            if (elapsedSecs > 15) return { ...order, status: 'ready' };
+            return order;
+          });
+        }
+      }
     }
   )
 );

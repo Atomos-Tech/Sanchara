@@ -17,6 +17,11 @@ const itemVariants = {
   animate: { opacity: 1, y: 0 },
 };
 
+// Venue coordinates (Crypto.com Arena, Los Angeles)
+const VENUE_LAT = 34.0430;
+const VENUE_LNG = -118.2673;
+const GEOFENCE_RADIUS_M = 500; // 500 meters = "inside"
+
 export default function DashboardPage() {
   const { user, claimDailyDrop, setActiveTab } = useArenaStore();
   const { bookedEvents } = useBookingStore();
@@ -71,11 +76,6 @@ export default function DashboardPage() {
 
     return () => window.removeEventListener('deviceorientation', handleOrientation);
   }, [rotateX, rotateY]);
-
-  // Venue coordinates (Crypto.com Arena, Los Angeles)
-  const VENUE_LAT = 34.0430;
-  const VENUE_LNG = -118.2673;
-  const GEOFENCE_RADIUS_M = 500; // 500 meters = "inside"
 
   useEffect(() => {
     if ('geolocation' in navigator) {

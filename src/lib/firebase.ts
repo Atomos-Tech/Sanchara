@@ -2,9 +2,6 @@
  * Firebase configuration and analytics service layer.
  *
  * Provides event tracking and screen view analytics for the Sanchara app.
- * Uses the new Function() pattern to dynamically load Firebase SDK at runtime,
- * which avoids build-time resolution errors when the package is not installed.
- * Falls back to console logging in development mode.
  *
  * Firebase services used (all free Spark plan, no billing required):
  * - Firebase Analytics: page views + custom events
@@ -15,6 +12,9 @@
  *
  * @module lib/firebase
  */
+
+import { initializeApp } from 'firebase/app';
+import { getAnalytics, isSupported, logEvent } from 'firebase/analytics';
 
 /**
  * Firebase project configuration (public identifiers, safe for client-side).
@@ -34,39 +34,22 @@ export const firebaseConfig = {
 let initialized = false;
 
 /** Holds { logEvent, analytics } when Firebase is ready */
-let firebaseAnalytics: { logEvent: (a: unknown, e: string, p?: Record<string, unknown>) => void; analytics: unknown } | null = null;
+let firebaseAnalytics: { logEvent: any; analytics: any } | null = null;
 
-/**
- * Initialize Firebase services.
- * Uses `new Function` to perform a truly dynamic import at RUNTIME — this avoids
- * Rollup/Vite build-time resolution errors when the `firebase` package is not
- * installed, while remaining fully compatible with Safari's security model.
- * The `new Function` wrapper prevents the bundler from statically analysing
- * the import path, making it treat it as an external runtime dependency.
- */
 export async function initFirebase(): Promise<void> {
   if (initialized) return;
   initialized = true;
 
   try {
-    // eslint-disable-next-line @typescript-eslint/no-implied-eval, no-new-func
-    const dynamicImport = new Function('specifier', 'return import(specifier)');
-
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const appMod: any = await dynamicImport('firebase/app');
-    const app = appMod.initializeApp(firebaseConfig);
-
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const analyticsMod: any = await dynamicImport('firebase/analytics');
-    const supported = await analyticsMod.isSupported();
+    const app = initializeApp(firebaseConfig);
+    const supported = await isSupported();
     if (supported) {
-      const analytics = analyticsMod.getAnalytics(app);
-      firebaseAnalytics = { logEvent: analyticsMod.logEvent, analytics };
+      const analytics = getAnalytics(app);
+      firebaseAnalytics = { logEvent, analytics };
       console.info('[Firebase] Analytics initialized');
     }
-  } catch {
-    // Firebase SDK not installed — gracefully fall back to console logging
-    console.info('[Firebase] SDK not available — using console analytics fallback');
+  } catch (e) {
+    console.info('[Firebase] SDK fallback — using console analytics fallback', e);
   }
 }
 

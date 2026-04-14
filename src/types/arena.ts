@@ -50,6 +50,7 @@ export interface Order {
   status: 'preparing' | 'ready' | 'delivering' | 'delivered';
   deliveryType: 'seat' | 'pickup';
   estimatedMinutes: number;
+  createdAt: number;
 }
 
 export interface ArenaAlert {

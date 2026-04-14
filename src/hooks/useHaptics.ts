@@ -35,7 +35,9 @@ export function useHaptics() {
     if (typeof window !== 'undefined' && navigator.vibrate) {
       try {
         navigator.vibrate(pattern);
-      } catch(e) {}
+      } catch (e) {
+        // Ignore vibration errors gracefully
+      }
     }
   }, []);
 

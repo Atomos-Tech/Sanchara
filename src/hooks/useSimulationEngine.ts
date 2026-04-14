@@ -40,6 +40,34 @@ export function useSimulationEngine() {
   const intervalRef = useRef<ReturnType<typeof setInterval>>();
 
   useEffect(() => {
+    // Fast-forward order states based on elapsed time when the app loads
+    const { orders } = useArenaStore.getState();
+    const now = Date.now();
+    let updatedOrders = false;
+    const fastForwardedOrders = orders.map((o) => {
+      if (o.status === 'delivered' || !o.createdAt) return o;
+      const elapsedMinutes = (now - o.createdAt) / 60000;
+      let newStatus = o.status;
+      
+      if (elapsedMinutes >= (o.estimatedMinutes || 10)) {
+        newStatus = 'delivered';
+      } else if (elapsedMinutes >= (o.estimatedMinutes ? o.estimatedMinutes * 0.6 : 6)) {
+        newStatus = 'delivering';
+      } else if (elapsedMinutes >= (o.estimatedMinutes ? o.estimatedMinutes * 0.2 : 2)) {
+        newStatus = 'ready';
+      }
+      
+      if (newStatus !== o.status) {
+        updatedOrders = true;
+        return { ...o, status: newStatus };
+      }
+      return o;
+    });
+
+    if (updatedOrders) {
+      useArenaStore.setState({ orders: fastForwardedOrders });
+    }
+
     intervalRef.current = setInterval(() => {
       const { facilities, gates, incrementTick } = useSimulationStore.getState();
 
