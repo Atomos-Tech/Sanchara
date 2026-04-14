@@ -34,7 +34,7 @@ export const firebaseConfig = {
 let initialized = false;
 
 /** Holds { logEvent, analytics } when Firebase is ready */
-let firebaseAnalytics: { logEvent: any; analytics: any } | null = null;
+let firebaseAnalytics: { logEvent: typeof logEvent; analytics: ReturnType<typeof getAnalytics> } | null = null;
 
 export async function initFirebase(): Promise<void> {
   if (initialized) return;

@@ -41,16 +41,16 @@ export const mockFacilities: Facility[] = [
 ];
 
 export const mockMenu: MenuItem[] = [
-  { id: 'm1', name: 'Stadium Burger', description: 'Angus beef, cheddar, special sauce', price: 450, category: 'food', image: '🍔', popular: true },
-  { id: 'm2', name: 'Loaded Nachos', description: 'Cheese, jalapeños, sour cream', price: 350, category: 'food', image: '🧀' },
-  { id: 'm3', name: 'Classic Hot Dog', description: 'All-beef frank, your choice of toppings', price: 250, category: 'food', image: '🌭', popular: true },
-  { id: 'm4', name: 'Chicken Tenders', description: 'Crispy tenders with ranch', price: 380, category: 'food', image: '🍗' },
-  { id: 'm5', name: 'Craft IPA', description: 'Local brewery seasonal', price: 600, category: 'drinks', image: '🍺', popular: true },
-  { id: 'm6', name: 'Frozen Margarita', description: 'Classic lime, salt rim', price: 700, category: 'drinks', image: '🍹' },
-  { id: 'm7', name: 'Soda', description: 'Coca-Cola, Thums Up, or Limca', price: 120, category: 'drinks', image: '🥤' },
-  { id: 'm8', name: 'Water', description: 'Bottled mineral water', price: 150, category: 'drinks', image: '💧' },
-  { id: 'm9', name: 'Team Jersey', description: 'Official replica jersey', price: 3500, category: 'merch', image: '👕' },
-  { id: 'm10', name: 'Rally Towel', description: 'Game day rally towel', price: 499, category: 'merch', image: '🏳️' },
+  { id: 'm1', name: 'Stadium Burger', description: 'Angus beef, cheddar, special sauce', price: 18, category: 'food', image: '🍔', popular: true },
+  { id: 'm2', name: 'Loaded Nachos', description: 'Cheese, jalapeños, sour cream', price: 14, category: 'food', image: '🧀' },
+  { id: 'm3', name: 'Classic Hot Dog', description: 'All-beef frank, your choice of toppings', price: 12, category: 'food', image: '🌭', popular: true },
+  { id: 'm4', name: 'Chicken Tenders', description: 'Crispy tenders with ranch', price: 16, category: 'food', image: '🍗' },
+  { id: 'm5', name: 'Craft IPA', description: 'Local brewery seasonal', price: 15, category: 'drinks', image: '🍺', popular: true },
+  { id: 'm6', name: 'Frozen Margarita', description: 'Classic lime, salt rim', price: 22, category: 'drinks', image: '🍹' },
+  { id: 'm7', name: 'Soda', description: 'Coca-Cola, Thums Up, or Limca', price: 7, category: 'drinks', image: '🥤' },
+  { id: 'm8', name: 'Water', description: 'Bottled mineral water', price: 6, category: 'drinks', image: '💧' },
+  { id: 'm9', name: 'Team Jersey', description: 'Official replica jersey', price: 140, category: 'merch', image: '👕' },
+  { id: 'm10', name: 'Rally Towel', description: 'Game day rally towel', price: 30, category: 'merch', image: '🏳️' },
 ];
 
 export const mockOrders: Order[] = [
@@ -60,7 +60,7 @@ export const mockOrders: Order[] = [
       { ...mockMenu[0], quantity: 2 },
       { ...mockMenu[4], quantity: 2 },
     ],
-    total: 2100,
+    total: 66,
     status: 'preparing',
     deliveryType: 'seat',
     estimatedMinutes: 12,

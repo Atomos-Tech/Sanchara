@@ -263,18 +263,20 @@ export default function ProfilePage() {
 
             <div className="space-y-3">
               <div className="glass-card p-4">
-                <label className="text-xs text-muted-foreground uppercase tracking-wider">Full Name</label>
+                <label htmlFor="profile-full-name" className="text-xs text-muted-foreground uppercase tracking-wider">Full Name</label>
                 <input
+                  id="profile-full-name"
                   value={editName}
                   onChange={(e) => setEditName(e.target.value)}
                   className="w-full mt-1 bg-transparent text-sm text-foreground border-b border-border/50 pb-2 outline-none focus:border-primary transition-colors"
                 />
               </div>
               <div className="glass-card p-4">
-                <label className="text-xs text-muted-foreground uppercase tracking-wider">Email</label>
+                <label htmlFor="profile-email" className="text-xs text-muted-foreground uppercase tracking-wider">Email</label>
                 <div className="flex items-center gap-2 mt-1">
                   <Mail size={14} className="text-muted-foreground" />
                   <input
+                    id="profile-email"
                     value={editEmail}
                     onChange={(e) => setEditEmail(e.target.value)}
                     className="flex-1 bg-transparent text-sm text-foreground border-b border-border/50 pb-2 outline-none focus:border-primary transition-colors"
@@ -282,10 +284,11 @@ export default function ProfilePage() {
                 </div>
               </div>
               <div className="glass-card p-4">
-                <label className="text-xs text-muted-foreground uppercase tracking-wider">Phone</label>
+                <label htmlFor="profile-phone" className="text-xs text-muted-foreground uppercase tracking-wider">Phone</label>
                 <div className="flex items-center gap-2 mt-1">
                   <Phone size={14} className="text-muted-foreground" />
                   <input
+                    id="profile-phone"
                     value={editPhone}
                     onChange={(e) => setEditPhone(e.target.value)}
                     className="flex-1 bg-transparent text-sm text-foreground border-b border-border/50 pb-2 outline-none focus:border-primary transition-colors"

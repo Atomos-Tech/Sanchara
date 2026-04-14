@@ -361,7 +361,7 @@ export default function OrderPage() {
             initial={{ y: 80, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: 80, opacity: 0 }}
-            className="fixed bottom-20 left-4 right-4 z-40 max-w-lg mx-auto"
+            className="fixed bottom-20 left-4 right-4 z-40 max-w-lg md:max-w-3xl lg:max-w-6xl w-full mx-auto"
           >
             <button
               onClick={() => setShowCart(!showCart)}

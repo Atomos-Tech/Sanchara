@@ -23,7 +23,7 @@ export default memo(function BottomNav() {
       role="tablist"
       aria-label="Main navigation"
     >
-      <div className="flex items-center justify-around px-2 py-2.5 max-w-lg mx-auto">
+      <div className="flex items-center justify-around px-2 py-2.5 max-w-lg md:max-w-3xl lg:max-w-6xl w-full mx-auto">
         {tabs.map((tab) => {
           const isActive = activeTab === tab.id;
           const Icon = tab.icon;
