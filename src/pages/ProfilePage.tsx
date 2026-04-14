@@ -252,13 +252,13 @@ export default function ProfilePage() {
                   <User size={36} className="text-primary" />
                 )}
                 <button
-                  onClick={handlePhotoChange}
+                  role="button" tabIndex={0} onClick={handlePhotoChange}
                   className="absolute -bottom-1 -right-1 w-7 h-7 rounded-full bg-primary flex items-center justify-center"
                 >
                   <Camera size={12} className="text-primary-foreground" />
                 </button>
               </div>
-              <button onClick={handlePhotoChange} className="text-xs text-primary font-medium">Tap to change photo</button>
+              <button role="button" tabIndex={0} onClick={handlePhotoChange} className="text-xs text-primary font-medium">Tap to change photo</button>
             </div>
 
             <div className="space-y-3">
@@ -299,7 +299,7 @@ export default function ProfilePage() {
                 <label className="text-xs text-muted-foreground uppercase tracking-wider">Password</label>
                 <div className="flex items-center justify-between mt-1">
                   <span className="text-sm text-muted-foreground">••••••••••</span>
-                  <button onClick={() => setSubPage('changePassword')} className="text-xs text-primary font-semibold">Change</button>
+                  <button role="button" tabIndex={0} onClick={() => setSubPage('changePassword')} className="text-xs text-primary font-semibold">Change</button>
                 </div>
               </div>
             </div>
@@ -319,7 +319,7 @@ export default function ProfilePage() {
             </AnimatePresence>
 
             <button
-              onClick={handleSaveProfile}
+              role="button" tabIndex={0} onClick={handleSaveProfile}
               className="w-full py-3 rounded-xl bg-primary text-primary-foreground text-sm font-bold active:scale-[0.98] transition-all"
             >
               Save Changes
@@ -341,7 +341,7 @@ export default function ProfilePage() {
                   placeholder="Enter current password"
                   className="flex-1 bg-transparent text-sm text-foreground border-b border-border/50 pb-2 outline-none focus:border-primary transition-colors placeholder:text-muted-foreground"
                 />
-                <button onClick={() => setShowCurrentPw(!showCurrentPw)} className="text-muted-foreground">
+                <button role="button" tabIndex={0} onClick={() => setShowCurrentPw(!showCurrentPw)} className="text-muted-foreground">
                   {showCurrentPw ? <EyeOff size={14} /> : <Eye size={14} />}
                 </button>
               </div>
@@ -357,7 +357,7 @@ export default function ProfilePage() {
                   placeholder="At least 8 characters"
                   className="flex-1 bg-transparent text-sm text-foreground border-b border-border/50 pb-2 outline-none focus:border-primary transition-colors placeholder:text-muted-foreground"
                 />
-                <button onClick={() => setShowNewPw(!showNewPw)} className="text-muted-foreground">
+                <button role="button" tabIndex={0} onClick={() => setShowNewPw(!showNewPw)} className="text-muted-foreground">
                   {showNewPw ? <EyeOff size={14} /> : <Eye size={14} />}
                 </button>
               </div>
@@ -382,7 +382,7 @@ export default function ProfilePage() {
               <p className="text-xs text-destructive">Passwords don't match</p>
             )}
             <button
-              onClick={handleChangePassword}
+              role="button" tabIndex={0} onClick={handleChangePassword}
               disabled={!currentPassword || !newPassword || !confirmPassword || newPassword !== confirmPassword || newPassword.length < 8}
               className="w-full py-3 rounded-xl bg-primary text-primary-foreground text-sm font-bold disabled:bg-muted disabled:text-muted-foreground active:scale-[0.98] transition-all"
             >
@@ -437,7 +437,7 @@ export default function ProfilePage() {
               </div>
             </div>
             <button
-              onClick={handleAddPayment}
+              role="button" tabIndex={0} onClick={handleAddPayment}
               disabled={!newCardNumber || !newCardExpiry || !newCardCvv || !newCardName}
               className="w-full py-3 rounded-xl bg-primary text-primary-foreground text-sm font-bold disabled:bg-muted disabled:text-muted-foreground active:scale-[0.98] transition-all"
             >
@@ -467,11 +467,11 @@ export default function ProfilePage() {
                   </div>
                   <div className="flex items-center gap-1">
                     {!addr.isDefault && (
-                      <button onClick={() => handleSetDefaultAddress(addr.id)} className="p-1.5 rounded-lg hover:bg-secondary/30 text-muted-foreground hover:text-primary transition-colors" title="Set default">
+                      <button role="button" tabIndex={0} onClick={() => handleSetDefaultAddress(addr.id)} className="p-1.5 rounded-lg hover:bg-secondary/30 text-muted-foreground hover:text-primary transition-colors" title="Set default">
                         <Check size={14} />
                       </button>
                     )}
-                    <button onClick={() => handleDeleteAddress(addr.id)} className="p-1.5 rounded-lg hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors">
+                    <button role="button" tabIndex={0} onClick={() => handleDeleteAddress(addr.id)} className="p-1.5 rounded-lg hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors">
                       <Trash2 size={14} />
                     </button>
                   </div>
@@ -493,14 +493,14 @@ export default function ProfilePage() {
                     />
                   ))}
                   <div className="flex gap-2">
-                    <button onClick={() => setShowAddAddress(false)} className="flex-1 py-2 rounded-lg glass-card text-sm text-muted-foreground">Cancel</button>
-                    <button onClick={handleAddAddress} className="flex-1 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-semibold">Save</button>
+                    <button role="button" tabIndex={0} onClick={() => setShowAddAddress(false)} className="flex-1 py-2 rounded-lg glass-card text-sm text-muted-foreground">Cancel</button>
+                    <button role="button" tabIndex={0} onClick={handleAddAddress} className="flex-1 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-semibold">Save</button>
                   </div>
                 </motion.div>
               )}
             </AnimatePresence>
 
-            <button onClick={() => setShowAddAddress(true)} className="w-full glass-card p-3 flex items-center justify-center gap-2 text-sm text-primary font-semibold hover:bg-primary/5 transition-colors">
+            <button role="button" tabIndex={0} onClick={() => setShowAddAddress(true)} className="w-full glass-card p-3 flex items-center justify-center gap-2 text-sm text-primary font-semibold hover:bg-primary/5 transition-colors">
               <Plus size={16} /> Add New Seat Configuration
             </button>
           </div>
@@ -531,11 +531,11 @@ export default function ProfilePage() {
                   {pay.type !== 'wallet' && (
                     <div className="flex items-center gap-1">
                       {!pay.isDefault && (
-                        <button onClick={() => handleSetDefaultPayment(pay.id)} className="p-1.5 rounded-lg hover:bg-secondary/30 text-muted-foreground hover:text-primary transition-colors" title="Set default">
+                        <button role="button" tabIndex={0} onClick={() => handleSetDefaultPayment(pay.id)} className="p-1.5 rounded-lg hover:bg-secondary/30 text-muted-foreground hover:text-primary transition-colors" title="Set default">
                           <Check size={14} />
                         </button>
                       )}
-                      <button onClick={() => handleDeletePayment(pay.id)} className="p-1.5 rounded-lg hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors">
+                      <button role="button" tabIndex={0} onClick={() => handleDeletePayment(pay.id)} className="p-1.5 rounded-lg hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors">
                         <Trash2 size={14} />
                       </button>
                     </div>
@@ -544,7 +544,7 @@ export default function ProfilePage() {
               </div>
             ))}
             <button
-              onClick={() => setSubPage('addPayment')}
+              role="button" tabIndex={0} onClick={() => setSubPage('addPayment')}
               className="w-full glass-card p-3 flex items-center justify-center gap-2 text-sm text-primary font-semibold hover:bg-primary/5 transition-colors"
             >
               <Plus size={16} /> Add Payment Method
@@ -573,7 +573,7 @@ export default function ProfilePage() {
                 <p className="text-sm text-muted-foreground">No bookings yet</p>
                 <p className="text-xs text-muted-foreground mt-1">Explore events and book your first experience!</p>
                 <button
-                  onClick={() => { setSubPage(null); setActiveTab('explore'); }}
+                  role="button" tabIndex={0} onClick={() => { setSubPage(null); setActiveTab('explore'); }}
                   className="mt-4 px-4 py-2 rounded-xl bg-primary text-primary-foreground text-xs font-semibold"
                 >
                   Browse Events
@@ -614,7 +614,7 @@ export default function ProfilePage() {
                 <div className="flex items-center justify-between pt-2 border-t border-border/30">
                   <span className="text-sm font-bold text-foreground">₹{order.total.toFixed(2)}</span>
                   <button
-                    onClick={() => handleReorder(order)}
+                    role="button" tabIndex={0} onClick={() => handleReorder(order)}
                     className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary text-primary-foreground text-xs font-semibold hover:bg-primary/90 active:scale-[0.97] transition-all"
                   >
                     <RotateCcw size={12} /> Reorder
@@ -641,7 +641,7 @@ export default function ProfilePage() {
                   <h3 className="text-sm font-semibold text-foreground">{item.label}</h3>
                   <p className="text-xs text-muted-foreground mt-0.5">{item.desc}</p>
                 </div>
-                <button onClick={() => toggleNotif(item.key)} className="text-primary">
+                <button role="button" tabIndex={0} onClick={() => toggleNotif(item.key)} className="text-primary">
                   {notifSettings[item.key] ? <ToggleRight size={28} /> : <ToggleLeft size={28} className="text-muted-foreground" />}
                 </button>
               </div>
@@ -658,7 +658,7 @@ export default function ProfilePage() {
                   <Moon size={18} className="text-muted-foreground" />
                   <span className="text-sm text-foreground">Dark Mode</span>
                 </div>
-                <button onClick={() => { setDarkMode(!darkMode); toast({ title: !darkMode ? '🌙 Dark Mode' : '☀️ Light Mode', description: `${!darkMode ? 'Dark' : 'Light'} mode activated.` }); }}>
+                <button role="button" tabIndex={0} onClick={() => { setDarkMode(!darkMode); toast({ title: !darkMode ? '🌙 Dark Mode' : '☀️ Light Mode', description: `${!darkMode ? 'Dark' : 'Light'} mode activated.` }); }}>
                   {darkMode ? <ToggleRight size={28} className="text-primary" /> : <ToggleLeft size={28} className="text-muted-foreground" />}
                 </button>
               </div>
@@ -673,12 +673,12 @@ export default function ProfilePage() {
             </div>
 
             <div className="glass-card divide-y divide-border/30">
-              <button onClick={() => setSubPage('privacyPolicy')} className="w-full flex items-center gap-3 px-4 py-3 hover:bg-secondary/20 transition-colors">
+              <button role="button" tabIndex={0} onClick={() => setSubPage('privacyPolicy')} className="w-full flex items-center gap-3 px-4 py-3 hover:bg-secondary/20 transition-colors">
                 <Lock size={18} className="text-muted-foreground" />
                 <span className="text-sm text-foreground">Privacy Policy</span>
                 <ChevronRight size={14} className="ml-auto text-muted-foreground" />
               </button>
-              <button onClick={() => setSubPage('termsOfService')} className="w-full flex items-center gap-3 px-4 py-3 hover:bg-secondary/20 transition-colors">
+              <button role="button" tabIndex={0} onClick={() => setSubPage('termsOfService')} className="w-full flex items-center gap-3 px-4 py-3 hover:bg-secondary/20 transition-colors">
                 <Info size={18} className="text-muted-foreground" />
                 <span className="text-sm text-foreground">Terms of Service</span>
                 <ChevronRight size={14} className="ml-auto text-muted-foreground" />
@@ -686,7 +686,7 @@ export default function ProfilePage() {
             </div>
 
             <button
-              onClick={() => setShowDeleteConfirm(true)}
+              role="button" tabIndex={0} onClick={() => setShowDeleteConfirm(true)}
               className="w-full py-3 rounded-xl bg-destructive/10 text-destructive text-sm font-semibold active:scale-[0.98] transition-all"
             >
               Delete Account
@@ -754,7 +754,7 @@ export default function ProfilePage() {
               </div>
             ))}
             <button
-              onClick={handleContactSupport}
+              role="button" tabIndex={0} onClick={handleContactSupport}
               className="w-full py-3 rounded-xl bg-primary text-primary-foreground text-sm font-semibold flex items-center justify-center gap-2 active:scale-[0.98] transition-all"
             >
               <MessageCircle size={16} /> Contact Live Support
@@ -785,7 +785,7 @@ export default function ProfilePage() {
               )}
             </div>
             <button
-              onClick={() => setSubPage('editProfile')}
+              role="button" tabIndex={0} onClick={() => setSubPage('editProfile')}
               className="absolute bottom-2 -right-1 w-7 h-7 rounded-full bg-primary flex items-center justify-center shadow-lg"
             >
               <Edit3 size={12} className="text-primary-foreground" />
@@ -837,7 +837,7 @@ export default function ProfilePage() {
               initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: i * 0.05 }}
-              onClick={() => setSubPage(item.id as SubPage)}
+              role="button" tabIndex={0} onClick={() => setSubPage(item.id as SubPage)}
               className="glass-card p-4 text-left hover:bg-secondary/30 transition-colors"
             >
               <item.icon size={22} className={item.color} />
@@ -855,7 +855,7 @@ export default function ProfilePage() {
             { icon: Settings, label: 'App Settings', value: '', action: () => setSubPage('settings') },
             { icon: LogOut, label: 'Sign Out', value: '', danger: true, action: () => setShowLogout(true) },
           ].map((item) => (
-            <button key={item.label} onClick={item.action} className="w-full flex items-center gap-3 px-4 py-3 hover:bg-secondary/20 transition-colors">
+            <button key={item.label} role="button" tabIndex={0} onClick={item.action} className="w-full flex items-center gap-3 px-4 py-3 hover:bg-secondary/20 transition-colors">
               <item.icon size={18} className={item.danger ? 'text-destructive' : 'text-muted-foreground'} />
               <span className={`flex-1 text-sm text-left ${item.danger ? 'text-destructive' : 'text-foreground'}`}>{item.label}</span>
               {item.value && <span className="text-xs text-muted-foreground">{item.value}</span>}
@@ -873,21 +873,21 @@ export default function ProfilePage() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm flex items-center justify-center p-6"
-            onClick={() => setShowLogout(false)}
+            role="button" tabIndex={0} onClick={() => setShowLogout(false)}
           >
             <motion.div
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.9, opacity: 0 }}
-              onClick={(e) => e.stopPropagation()}
+              role="button" tabIndex={0} onClick={(e) => e.stopPropagation()}
               className="glass-card-elevated p-6 rounded-2xl max-w-sm w-full text-center space-y-4"
             >
               <LogOut size={32} className="mx-auto text-destructive" />
               <h2 className="text-lg font-display font-bold text-foreground">Sign Out?</h2>
               <p className="text-sm text-muted-foreground">You'll need to sign in again to access your account and Arena Points.</p>
               <div className="flex gap-3">
-                <button onClick={() => setShowLogout(false)} className="flex-1 py-2.5 rounded-xl glass-card text-sm font-semibold text-foreground">Cancel</button>
-                <button onClick={() => { setShowLogout(false); localStorage.removeItem('sanchara-arena-storage'); localStorage.removeItem('sanchara-booking-storage'); toast({ title: '👋 Signed Out', description: 'You have been signed out. Reloading...' }); setTimeout(() => window.location.reload(), 1000); }} className="flex-1 py-2.5 rounded-xl bg-destructive text-destructive-foreground text-sm font-semibold">Sign Out</button>
+                <button role="button" tabIndex={0} onClick={() => setShowLogout(false)} className="flex-1 py-2.5 rounded-xl glass-card text-sm font-semibold text-foreground">Cancel</button>
+                <button role="button" tabIndex={0} onClick={() => { setShowLogout(false); localStorage.removeItem('sanchara-arena-storage'); localStorage.removeItem('sanchara-booking-storage'); toast({ title: '👋 Signed Out', description: 'You have been signed out. Reloading...' }); setTimeout(() => window.location.reload(), 1000); }} className="flex-1 py-2.5 rounded-xl bg-destructive text-destructive-foreground text-sm font-semibold">Sign Out</button>
               </div>
             </motion.div>
           </motion.div>
@@ -902,21 +902,21 @@ export default function ProfilePage() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             className="fixed inset-0 z-[60] bg-background/80 backdrop-blur-sm flex items-center justify-center p-6"
-            onClick={() => setShowDeleteConfirm(false)}
+            role="button" tabIndex={0} onClick={() => setShowDeleteConfirm(false)}
           >
             <motion.div
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.9, opacity: 0 }}
-              onClick={(e) => e.stopPropagation()}
+              role="button" tabIndex={0} onClick={(e) => e.stopPropagation()}
               className="glass-card-elevated p-6 rounded-2xl max-w-sm w-full text-center space-y-4"
             >
               <Trash2 size={32} className="mx-auto text-destructive" />
               <h2 className="text-lg font-display font-bold text-foreground">Delete Account?</h2>
               <p className="text-sm text-muted-foreground">This action is irreversible. All your data, Arena Points, and order history will be permanently deleted.</p>
               <div className="flex gap-3">
-                <button onClick={() => setShowDeleteConfirm(false)} className="flex-1 py-2.5 rounded-xl glass-card text-sm font-semibold text-foreground">Cancel</button>
-                <button onClick={handleDeleteAccount} className="flex-1 py-2.5 rounded-xl bg-destructive text-destructive-foreground text-sm font-semibold">Delete</button>
+                <button role="button" tabIndex={0} onClick={() => setShowDeleteConfirm(false)} className="flex-1 py-2.5 rounded-xl glass-card text-sm font-semibold text-foreground">Cancel</button>
+                <button role="button" tabIndex={0} onClick={handleDeleteAccount} className="flex-1 py-2.5 rounded-xl bg-destructive text-destructive-foreground text-sm font-semibold">Delete</button>
               </div>
             </motion.div>
           </motion.div>
@@ -931,18 +931,18 @@ export default function ProfilePage() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm"
-            onClick={() => setSubPage(getBack())}
+            role="button" tabIndex={0} onClick={() => setSubPage(getBack())}
           >
             <motion.div
               initial={{ x: '100%' }}
               animate={{ x: 0 }}
               exit={{ x: '100%' }}
               transition={{ type: 'spring', damping: 25 }}
-              onClick={(e) => e.stopPropagation()}
+              role="button" tabIndex={0} onClick={(e) => e.stopPropagation()}
               className="absolute top-0 right-0 bottom-0 w-full max-w-md glass-card-elevated overflow-y-auto"
             >
               <div className="sticky top-0 z-10 glass-card-elevated p-4 flex items-center gap-3 border-b border-border/30">
-                <button onClick={() => setSubPage(getBack())} className="w-8 h-8 rounded-full bg-secondary/50 flex items-center justify-center text-muted-foreground hover:text-foreground">
+                <button role="button" tabIndex={0} onClick={() => setSubPage(getBack())} className="w-8 h-8 rounded-full bg-secondary/50 flex items-center justify-center text-muted-foreground hover:text-foreground">
                   <ArrowLeft size={16} />
                 </button>
                 <h2 className="text-base font-display font-semibold text-foreground">{getTitle()}</h2>
