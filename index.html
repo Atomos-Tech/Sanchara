@@ -3,30 +3,43 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://apis.google.com https://www.gstatic.com https://www.googletagmanager.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://*.googleapis.com https://*.google.com https://*.firebaseio.com https://*.cloudfunctions.net wss://*.firebaseio.com; frame-src 'self' https://accounts.google.com;" />
+
+    <!-- Content Security Policy -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://apis.google.com https://www.gstatic.com https://www.googletagmanager.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://*.googleapis.com https://*.google.com https://*.firebaseio.com https://*.cloudfunctions.net wss://*.firebaseio.com https://api.qrserver.com; frame-src 'self' https://accounts.google.com;" />
+
+    <!-- Primary Meta Tags -->
     <title>Sanchara — Stadium Super App</title>
-    <meta name="description" content="Sanchara — Your all-in-one stadium super app. Order food, track wait times, book events, and manage your arena experience.">
+    <meta name="description" content="Sanchara — Your all-in-one stadium super app. Order food, track wait times, book events, and manage your arena experience in real-time." />
+    <meta name="keywords" content="stadium app, arena, sports, events, food ordering, tickets, live events" />
+    <meta name="author" content="Sanchara Team" />
+    <meta name="robots" content="index, follow" />
+    <link rel="canonical" href="https://sanchara-web-c7zpilarrq-uc.a.run.app" />
+
+    <!-- PWA / Theme -->
     <meta name="theme-color" content="#0B132B" />
+    <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="Sanchara" />
     <meta name="format-detection" content="telephone=no" />
     <link rel="manifest" href="./manifest.json" />
-    <link rel="canonical" href="https://prompt-wars-493103.web.app" />
+
+    <!-- Open Graph / Social -->
     <meta property="og:type" content="website" />
-    
-    
-    <meta property="og:image" content="https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/0af3c1fa-cef6-48ad-bffd-3ad5787720b1/id-preview-d61c94c0--da989d49-9597-47bf-b6b3-7fcd1049e85c.lovable.app-1775786591848.png">
+    <meta property="og:url" content="https://sanchara-web-c7zpilarrq-uc.a.run.app" />
+    <meta property="og:title" content="Sanchara — Stadium Super App" />
+    <meta property="og:description" content="Your all-in-one stadium super app. Order food, track wait times, book events, and manage your arena experience." />
+    <meta property="og:image" content="https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/0af3c1fa-cef6-48ad-bffd-3ad5787720b1/id-preview-d61c94c0--da989d49-9597-47bf-b6b3-7fcd1049e85c.lovable.app-1775786591848.png" />
+
+    <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image" />
-    
-    
-    <meta name="twitter:image" content="https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/0af3c1fa-cef6-48ad-bffd-3ad5787720b1/id-preview-d61c94c0--da989d49-9597-47bf-b6b3-7fcd1049e85c.lovable.app-1775786591848.png">
-    <style>body{background:hsl(224,71%,11%);margin:0}</style>
-    <meta property="og:title" content="Sanchara">
-  <meta name="twitter:title" content="Sanchara">
-  <meta property="og:description" content="Sanchara — Your all-in-one stadium super app. Order food, track wait times, book events, and manage your arena experience.">
-  <meta name="twitter:description" content="Sanchara — Your all-in-one stadium super app. Order food, track wait times, book events, and manage your arena experience.">
-</head>
+    <meta name="twitter:title" content="Sanchara — Stadium Super App" />
+    <meta name="twitter:description" content="Your all-in-one stadium super app." />
+    <meta name="twitter:image" content="https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/0af3c1fa-cef6-48ad-bffd-3ad5787720b1/id-preview-d61c94c0--da989d49-9597-47bf-b6b3-7fcd1049e85c.lovable.app-1775786591848.png" />
+
+    <!-- Inline critical above-fold styles to prevent FOUC -->
+    <style>body { background: hsl(224, 71%, 11%); margin: 0; }</style>
+  </head>
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>

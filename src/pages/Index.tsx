@@ -138,7 +138,8 @@ export default function Index() {
       <main
         id="main-content"
         role="main"
-        className="max-w-lg mx-auto px-4 pt-6 pb-24 h-[100dvh] overflow-y-auto overflow-x-hidden sanchara-scroll relative"
+        className="max-w-lg mx-auto px-4 pt-6 pb-24 min-h-screen overflow-y-auto overflow-x-hidden sanchara-scroll relative"
+        style={{ height: '100svh' }}
       >
         <ErrorBoundary>
           <Suspense fallback={<LoadingSkeleton />}>
