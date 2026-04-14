@@ -85,22 +85,32 @@ export default function BookingModal() {
             {bookingStep === 1 && (
               <motion.div key="step1" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="space-y-3 py-2">
                 <h3 className="text-sm font-display font-semibold text-foreground">Choose Your Tier</h3>
-                {seatingTiers.map((tier) => (
+                {seatingTiers.map((baseTier) => {
+                  let dynamicPrice = baseTier.price;
+                  if (selectedEvent && selectedEvent.basePrice) {
+                    if (baseTier.id === 'tier-4') dynamicPrice = selectedEvent.basePrice;
+                    else if (baseTier.id === 'tier-3') dynamicPrice = Math.floor(selectedEvent.basePrice * 2.3);
+                    else if (baseTier.id === 'tier-2') dynamicPrice = Math.floor(selectedEvent.basePrice * 3.75);
+                    else if (baseTier.id === 'tier-1') dynamicPrice = Math.floor(selectedEvent.basePrice * 6.5);
+                  }
+                  const currentTier = { ...baseTier, price: dynamicPrice };
+
+                  return (
                   <button
-                    key={tier.id}
-                    onClick={() => selectTier(tier)}
+                    key={currentTier.id}
+                    onClick={() => selectTier(currentTier)}
                     className={`w-full glass-card p-4 text-left transition-all ${
-                      selectedTier?.id === tier.id ? 'border-primary/50 glow-cyan' : ''
+                      selectedTier?.id === currentTier.id ? 'border-primary/50 glow-cyan' : ''
                     }`}
                   >
                     <div className="flex items-center justify-between mb-1">
-                      <h4 className="text-sm font-semibold text-foreground">{tier.name}</h4>
-                      <span className="text-base font-bold text-primary">₹{tier.price}</span>
+                      <h4 className="text-sm font-semibold text-foreground">{currentTier.name}</h4>
+                      <span className="text-base font-bold text-primary">₹{currentTier.price.toLocaleString('en-IN')}</span>
                     </div>
-                    <p className="text-xs text-muted-foreground">{tier.description}</p>
-                    <p className="text-[10px] text-muted-foreground mt-1">{tier.available} seats available</p>
+                    <p className="text-xs text-muted-foreground">{currentTier.description}</p>
+                    <p className="text-[10px] text-muted-foreground mt-1">{currentTier.available} seats available</p>
                   </button>
-                ))}
+                )})} 
 
                 {selectedTier && (
                   <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="glass-card p-4">

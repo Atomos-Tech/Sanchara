@@ -112,7 +112,7 @@ export default function ExplorePage() {
                     <Clock size={12} /> {new Date(featuredEvent.date + 'T00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} · {featuredEvent.time}
                   </p>
                   <div className="flex items-center gap-3 mt-2">
-                    <span className="text-lg font-bold text-primary">From ₹{featuredEvent.basePrice}</span>
+                    <span className="text-lg font-bold text-primary">From ₹{featuredEvent.basePrice.toLocaleString('en-IN')}</span>
                     <span className="flex items-center gap-1 text-xs text-accent">
                       <Star size={10} fill="currentColor" /> {featuredEvent.rating}
                     </span>
@@ -152,7 +152,7 @@ export default function ExplorePage() {
                     <h3 className="text-xs font-semibold text-foreground truncate">{event.name}</h3>
                     <p className="text-[10px] text-muted-foreground mt-0.5">{new Date(event.date + 'T00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</p>
                     <div className="flex items-center justify-between mt-1.5">
-                      <span className="text-xs font-bold text-primary">₹{event.basePrice}</span>
+                      <span className="text-xs font-bold text-primary">₹{event.basePrice.toLocaleString('en-IN')}</span>
                       <span className="flex items-center gap-0.5 text-[10px] text-accent">
                         <Star size={8} fill="currentColor" /> {event.rating}
                       </span>
@@ -216,7 +216,7 @@ export default function ExplorePage() {
                     )}
                   </div>
                   <div className="flex items-center gap-3">
-                    <span className="text-sm font-bold text-primary">₹{event.basePrice}</span>
+                    <span className="text-sm font-bold text-primary">₹{event.basePrice.toLocaleString('en-IN')}</span>
                     <button
                       onClick={() => selectEvent(event)}
                       className="px-3 py-1.5 rounded-lg bg-primary text-primary-foreground text-xs font-semibold hover:bg-primary/90 active:scale-[0.97] transition-all"
