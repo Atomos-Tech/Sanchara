@@ -112,22 +112,20 @@ export default function SancharaNavigator({ open, onClose }: Props) {
     animRef.current = animate(progress, 1, {
       duration: demoDuration,
       ease: 'linear',
-      onUpdate: () => updateDot(),
+      onUpdate: () => {
+        updateDot();
+        // Dynamically update ETA based on remaining progress
+        const currentProgress = progress.get();
+        if (currentProgress < 1) {
+             const remainingSecs = Math.floor(totalSec * (1 - currentProgress));
+             setEta(remainingSecs);
+        }
+      },
       onComplete: () => {
         setRouting(false);
         setEta(0);
       },
     });
-
-    // ETA countdown
-    const interval = setInterval(() => {
-      setEta((prev) => {
-        if (prev <= 1) { clearInterval(interval); return 0; }
-        return prev - 1;
-      });
-    }, 1000 * (totalSec / demoDuration));
-
-    return () => clearInterval(interval);
   };
 
   const stopRouting = () => {
