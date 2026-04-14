@@ -218,7 +218,7 @@ export default function SancharaNavigator({ open, onClose }: Props) {
                 className="absolute inset-0 w-full h-full object-cover opacity-50 z-0"
               />
             )}
-            <svg viewBox="0 0 400 300" className="w-full h-full relative z-10" style={{ maxHeight: '55vh' }}>
+            <svg viewBox="-20 -20 440 340" className="w-full h-full relative z-10" style={{ maxHeight: '55vh' }}>
               {/* Stadium outer wall */}
               {!arMode && <ellipse cx="200" cy="150" rx="190" ry="140" fill="none" stroke="hsl(var(--border))" strokeWidth="2" opacity="0.4" />}
               {/* Inner concourse */}
