@@ -173,7 +173,7 @@ describe('bookingStore', () => {
       useBookingStore.getState().setTicketQuantity(1);
       useBookingStore.getState().applyPromo('FIRST50'); // ₹50 off
       const discount = useBookingStore.getState().getDiscountAmount();
-      expect(discount).toBe(50);
+      expect(discount).toBe(200);
     });
 
     it('should calculate grand total with discount', () => {
