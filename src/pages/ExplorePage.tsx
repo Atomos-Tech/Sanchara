@@ -14,14 +14,14 @@ const categories = [
 ];
 
 const exploreEvents: (CalendarEvent & { rating?: number; attendees?: string; trending?: boolean; imageUrl?: string })[] = [
-  { id: 'exp1', date: '2026-04-10', name: 'Lakers vs Warriors', venue: 'Crypto.com Arena', time: '7:30 PM', category: 'sports', image: '🏀', basePrice: 85, rating: 4.8, attendees: '18.2K', trending: true },
-  { id: 'exp2', date: '2026-04-12', name: 'Taylor Swift - Eras Tour', venue: 'Crypto.com Arena', time: '8:00 PM', category: 'concert', image: '🎤', basePrice: 150, rating: 4.9, attendees: '20K', trending: true },
-  { id: 'exp3', date: '2026-04-14', name: 'Kevin Hart Live', venue: 'The Forum', time: '9:00 PM', category: 'comedy', image: '😂', basePrice: 75, rating: 4.7, attendees: '5.8K' },
-  { id: 'exp4', date: '2026-04-15', name: 'Clippers vs Suns', venue: 'Crypto.com Arena', time: '6:00 PM', category: 'sports', image: '🏀', basePrice: 65, rating: 4.5, attendees: '17.1K' },
-  { id: 'exp5', date: '2026-04-18', name: 'Bad Bunny World Tour', venue: 'SoFi Stadium', time: '8:30 PM', category: 'concert', image: '🎵', basePrice: 130, rating: 4.8, attendees: '70K', trending: true },
-  { id: 'exp6', date: '2026-04-20', name: 'Dave Chappelle', venue: 'Hollywood Bowl', time: '8:00 PM', category: 'comedy', image: '🎭', basePrice: 95, rating: 4.9, attendees: '8K' },
-  { id: 'exp7', date: '2026-04-22', name: 'UFC Fight Night 312', venue: 'Crypto.com Arena', time: '7:00 PM', category: 'sports', image: '🥊', basePrice: 95, rating: 4.6, attendees: '15K', trending: true },
-  { id: 'exp8', date: '2026-04-25', name: 'Lakers vs Celtics', venue: 'Crypto.com Arena', time: '7:00 PM', category: 'sports', image: '🏀', basePrice: 120, rating: 4.9, attendees: '18.5K' },
+  { id: 'exp1', date: '2026-04-10', name: 'Lakers vs Warriors', venue: 'Crypto.com Arena', time: '7:30 PM', category: 'sports', image: '🏀', basePrice: 12000, rating: 4.8, attendees: '18.2K', trending: true },
+  { id: 'exp2', date: '2026-04-12', name: 'Taylor Swift - Eras Tour', venue: 'Crypto.com Arena', time: '8:00 PM', category: 'concert', image: '🎤', basePrice: 25000, rating: 4.9, attendees: '20K', trending: true },
+  { id: 'exp3', date: '2026-04-14', name: 'Kevin Hart Live', venue: 'The Forum', time: '9:00 PM', category: 'comedy', image: '😂', basePrice: 6500, rating: 4.7, attendees: '5.8K' },
+  { id: 'exp4', date: '2026-04-15', name: 'Clippers vs Suns', venue: 'Crypto.com Arena', time: '6:00 PM', category: 'sports', image: '🏀', basePrice: 5000, rating: 4.5, attendees: '17.1K' },
+  { id: 'exp5', date: '2026-04-18', name: 'Bad Bunny World Tour', venue: 'SoFi Stadium', time: '8:30 PM', category: 'concert', image: '🎵', basePrice: 18000, rating: 4.8, attendees: '70K', trending: true },
+  { id: 'exp6', date: '2026-04-20', name: 'Dave Chappelle', venue: 'Hollywood Bowl', time: '8:00 PM', category: 'comedy', image: '🎭', basePrice: 11000, rating: 4.9, attendees: '8K' },
+  { id: 'exp7', date: '2026-04-22', name: 'UFC Fight Night 312', venue: 'Crypto.com Arena', time: '7:00 PM', category: 'sports', image: '🥊', basePrice: 11000, rating: 4.6, attendees: '15K', trending: true },
+  { id: 'exp8', date: '2026-04-25', name: 'Lakers vs Celtics', venue: 'Crypto.com Arena', time: '7:00 PM', category: 'sports', image: '🏀', basePrice: 16000, rating: 4.9, attendees: '18.5K' },
 ];
 
 const featuredEvent = exploreEvents[1]; // Taylor Swift

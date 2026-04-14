@@ -158,7 +158,7 @@ export const useBookingStore = create<BookingStore>()(
   }),
     }),
     {
-      name: 'sanchara-booking-storage',
+      name: 'sanchara-booking-storage', version: 1,
     }
   )
 );

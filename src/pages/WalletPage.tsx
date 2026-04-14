@@ -14,7 +14,7 @@ export default function WalletPage() {
   const { toast } = useToast();
 
   const rewards = activeFilter === 'all' ? mockRewards : mockRewards.filter((r) => r.category === activeFilter);
-  const levelProgress = (user.arenaPoints % 1000) / 10;
+  const levelProgress = (user.arenaPoints % 10000) / 100;
 
   const handleRedeem = (reward: typeof mockRewards[0]) => {
     if (spendPoints(reward.pointsCost)) {
@@ -61,7 +61,7 @@ export default function WalletPage() {
             />
           </div>
           <p className="text-[10px] text-muted-foreground text-center">
-            {1000 - (user.arenaPoints % 1000)} pts to next level
+            {10000 - (user.arenaPoints % 10000)} pts to next level
           </p>
         </div>
       </div>

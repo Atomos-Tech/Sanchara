@@ -203,7 +203,7 @@ export const useArenaStore = create<ArenaState>()(
   })),
     }),
     {
-      name: 'sanchara-arena-storage',
+      name: 'sanchara-arena-storage', version: 1,
       partialize: (state) => Object.fromEntries(
         Object.entries(state).filter(([key]) => !['savedPayments'].includes(key))
       ),

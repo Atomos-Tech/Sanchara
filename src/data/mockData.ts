@@ -3,7 +3,7 @@ import type { Ticket, GateSuggestion, Facility, MenuItem, Order, ArenaAlert, Rew
 export const mockUser: UserProfile = {
   id: 'user-1',
   name: 'Alex Rivera',
-  arenaPoints: 2450,
+  arenaPoints: 24500,
   level: 7,
   dailyDropClaimed: false,
   streak: 3,
@@ -60,7 +60,7 @@ export const mockOrders: Order[] = [
       { ...mockMenu[0], quantity: 2 },
       { ...mockMenu[4], quantity: 2 },
     ],
-    total: 1250,
+    total: 1660,
     status: 'preparing',
     deliveryType: 'seat',
     estimatedMinutes: 12,
@@ -76,10 +76,10 @@ export const mockAlerts: ArenaAlert[] = [
 ];
 
 export const mockRewards: RewardItem[] = [
-  { id: 'r1', name: 'Free Hot Dog', description: 'Redeem at any concession stand', pointsCost: 500, category: 'food', icon: '🌭' },
-  { id: 'r2', name: '25% Off Merch', description: 'Any item at the Team Store', pointsCost: 1000, category: 'merch', icon: '🏷️' },
-  { id: 'r3', name: 'VIP Lounge Pass', description: '1-hour access to VIP lounge', pointsCost: 3000, category: 'experience', icon: '⭐' },
-  { id: 'r4', name: 'Seat Upgrade', description: 'Upgrade to premium seating', pointsCost: 5000, category: 'upgrade', icon: '🎫' },
-  { id: 'r5', name: 'Free Craft Beer', description: 'Any craft beer on tap', pointsCost: 800, category: 'food', icon: '🍺' },
-  { id: 'r6', name: 'Meet & Greet', description: 'Post-game player meet & greet', pointsCost: 10000, category: 'experience', icon: '🤝' },
+  { id: 'r1', name: 'Free Hot Dog', description: 'Redeem at any concession stand', pointsCost: 6000, category: 'food', icon: '🌭' },
+  { id: 'r2', name: '25% Off Merch', description: 'Any item at the Team Store', pointsCost: 15000, category: 'merch', icon: '🏷️' },
+  { id: 'r3', name: 'VIP Lounge Pass', description: '1-hour access to VIP lounge', pointsCost: 45000, category: 'experience', icon: '⭐' },
+  { id: 'r4', name: 'Seat Upgrade', description: 'Upgrade to premium seating', pointsCost: 80000, category: 'upgrade', icon: '🎫' },
+  { id: 'r5', name: 'Free Craft Beer', description: 'Any craft beer on tap', pointsCost: 7500, category: 'food', icon: '🍺' },
+  { id: 'r6', name: 'Meet & Greet', description: 'Post-game player meet & greet', pointsCost: 150000, category: 'experience', icon: '🤝' },
 ];
